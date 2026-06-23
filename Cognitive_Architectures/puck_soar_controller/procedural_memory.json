@@ -1,0 +1,52 @@
+{
+  "wander": {
+    "type": "navigation",
+    "priority": 1,
+    "preconditions": {
+      "battery_min": 10
+    },
+    "params": {
+      "speed": 0.6
+    }
+  },
+
+  "explore_sector": {
+    "type": "navigation",
+    "priority": 2,
+    "preconditions": {
+      "has_target": true
+    },
+    "params": {
+      "strategy": "lawnmower"
+    }
+  },
+
+  "avoid_obstacle": {
+    "type": "reactive",
+    "priority": 10,
+    "preconditions": {
+      "proximity_threshold": 0.8
+    }
+  },
+
+  "return_to_nest": {
+    "type": "goal",
+    "priority": 5,
+    "preconditions": {
+      "battery_min": 0,
+      "battery_critical": true
+    }
+  },
+
+  "go_to_position": {
+    "type": "navigation",
+    "priority": 2,
+    "preconditions": {
+      "battery_min": 0,
+      "battery_critical": true
+    },
+    "params": {
+      "target_position": [0, 0]
+    }
+  }
+}
