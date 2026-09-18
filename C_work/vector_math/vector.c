@@ -17,11 +17,97 @@ void vector_free(Vector *v){
 
 }
 
-
-double vector_get(const Vector *v, size_t i){
-    return vector->data[i];
+bool check_dimensions(const Vector *a, const Vector *b){
+    if(a->size == b->size){
+    return True;
+    }
+    else{
+    printf("bad dimensions");
+    return False;
+    }
 }
 
-void vector_set (Vector *v , size_t i, double value){
-    v->data[i] = value;
+
+void vector_copy(Vector *a, const Vector *b){
+
+    if(check_dimensions(*a, *b) == False){
+    return
+    }
+
+    for (size_t i = 0; i < a->size; i++){
+       a->data[i] = b->data[i];
+    }
 }
+
+void vector_fill(Vector *a, double d){
+   for(size_t i = 0; i < a->size; i++){
+      a->data[i] = d;
+   }
+}
+
+void vector_print(const Vector *a){
+   printf("[");
+   for(size_t i = 0; i < a->size; i++){
+      printf("%f, ", a->data[i]);
+   }
+   printf("]\n");
+}
+
+void vector_add(Vector *a, const Vector *b){
+   if(check_dimensions(*a, *b) == False){
+   return;
+   }
+
+   for(size_t i = 0;  i < a->size; i++){
+      a->data[i] += b->data[i];
+   }
+}
+
+void vector_subtract(Vector *a, const Vector *b){
+   if(check_dimensions(*a, *b) == False){
+   return;
+   }
+
+   for(size_t i = 0;  i < a->size; i++){
+      a->data[i] -= b->data[i];
+   }
+}
+
+void vector_scale(Vector *a, double scalar){
+
+   for(size_t i = 0;  i < a->size; i++){
+      a->data[i] = a->data[i] * scalar;
+   }
+}
+
+void vector_multiply(Vector *a, const Vector *b){
+   if(check_dimensions(*a, *b) == False){
+   return;
+   }
+
+   for(size_t i = 0;  i < a->size; i++){
+      a->data[i] *= b->data[i];
+   }
+}
+
+void vector_divide(Vector *a, const Vector *b){
+   if(check_dimensions(*a, *b) == False){
+   return;
+   }
+
+   for(size_t i = 0;  i < a->size; i++){
+      a->data[i] /= b->data[i];
+   }
+}
+
+double dot_product(const Vector *a, const Vector *b){
+   double product = 0.0;
+   for(size_t i = 0; i < a->size; i++){
+      product += a->data[i] * b->data[i];
+   }
+   return product;
+}
+
+//Norms
+
+
