@@ -44,6 +44,12 @@ void swap_rows(Matrix m, int a, int b){
 
 }
 
+void scale_row(Matrix m, int row, double scalar){
+    for (int i = 0; i < m.cols; i++){
+       m.data[row * m.cols + i] = m.data[row * m.cols + i] * scalar;
+    }
+}
+
 void add_rows(Matrix m, int a, int b){
 
    for(int j = 0; j < m.cols; j++){
@@ -116,25 +122,34 @@ int select_pivot(Matrix m, int row){
 
 Matrix gaussian_elimination(Matrix m){
 
-   for(int i = 0; i < m.rows; i++){
-      int pivot = select_pivot(m, 
+   for(int i = 0; i < m.rows; i++) {
+      for (int j = 1; j < m.rows - i; j++){
+        double divisor = m.data[(i + j) * m.cols + i] / m.data[i * m.cols + i];
+
+      printf("Divisor: %f\n", divisor);
+      scale_row(m, i, divisor);
+      print_matrix(m);
+      printf("===========================\n");
+      subtract_rows(m, i + j, i);
+      print_matrix(m);
+      printf("===========================\n");
+
+      }
    }
+ return m;
 }
 
+Matrix reduced_REF(Matrix m){
 
+   m = gaussian_elimination(m);
+   //normalize pivots 
 int main(){
 
    Matrix m = create_matrix(3, 3);
-   double data[] = {0.0, 2.0, 3.0, 5.0, 1.0, 6.0, 3.0, 0.0, 9.0};
+   double data[] = {2.0, 1.0, -1.0, -4.0, -6.0, 5.0, 2.0, 3.0, -2.0};
    m.data = data;
-
-   for(int i = 0; i < m.rows; i++){
-     Matrix p = create_matrix(3, 3);
-     double pdata[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-     p.data = pdata;
-     int pivot = select_pivot(m, i);
-     printf("Best pivot at: %d\n", pivot);
-     
-   }
+   print_matrix(m);
+   m = gaussian_elimination(m);
+   print_matrix(m);
 return 0;
 }
