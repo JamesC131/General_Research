@@ -111,3 +111,98 @@ double dot_product(const Vector *a, const Vector *b){
 //Norms
 
 
+double vector_L1_norm(const Vector *v){
+     double sum = 0.0;
+
+     for (size_t i = 0; i < v->size; i++){
+        sum += fabs(v->data[i]);
+     }
+
+     return sum;
+}
+
+
+double vector_L2_norm(const Vector *v){
+
+      double sum = 0.0;
+      for (size_t i = 0; i < v->size; i++){
+         sum += v->data[i] * v->data[i];
+      }
+
+      return sqrt(sum);
+}
+
+double vector_L2_squared(const Vector *v){
+
+      double sum = 0.0;
+
+      for (size_t i = 0; i < v->size; i++){
+         sum += v->data[i] * v->data[i];
+      }
+
+      return sum;
+}
+
+double vector_Linf_norm(const Vector *v){
+
+      double max = 0.0;
+
+      for (size_t i = 0; i < v->size; i++){
+         double value = fabs(v->data[i]);
+
+         if(value > max){
+           max = value;
+         }
+        }
+
+      return max;
+}
+
+
+Vector calculate_R(const Vector *a, const Vector *b){
+      Vector d = create_vector(a->size);
+
+      for (size_t i = 0; i < a->size; i++){
+         d->data[i] = a->data[i] - b->data[i];
+      }
+
+return d;
+
+}
+
+double vector_L1_distance(const Vector *a, const Vector *b){
+
+      Vector d = calculate_R(&a, &b);
+      double distance = vector_L1_norm(&d);
+      free_vector(d);
+      return distance;
+}
+
+
+double vector_L2_distance(const Vector *a, const Vector *b){
+
+      Vector d = calculate_R(&a, &b);
+      double distance = vector_L2_norm(&d);
+      free_vector(d);
+      return distance;
+}
+
+
+
+double vector_L2_squared_distance(const Vector *a, const Vector *b){
+
+      Vector d = calculate_R(&a, &b);
+      double distance = vector_L2_squared(&d);
+      free_vector(d);
+      return distance;
+}
+
+
+double vector_Linf_distance(const Vector *a, const Vector *b){
+
+      Vector d = calculate_R(&a, &b);
+      double distance = vector_Linf_norm(&d);
+      free_vector(d);
+      return distance;
+}
+

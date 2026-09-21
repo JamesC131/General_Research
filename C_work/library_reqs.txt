@@ -1,0 +1,94 @@
+Vector
+ ├── add/subtract
+ ├── scale
+ ├── dot
+ ├── norms
+ ├── distances
+ └── statistics
+
+Matrix
+ ├── add/subtract
+ ├── scale
+ ├── transpose
+ ├── matrix × vector
+ └── matrix × matrix
+
+
+PHASE 1 — Vector fundamentals
+│
+├── create/free
+├── get/set
+├── add/subtract
+├── scalar multiplication
+├── dot product
+├── element-wise multiplication
+├── sum/mean/min/max
+└── argmin/argmax
+
+        ↓
+
+PHASE 2 — Norms
+│
+├── L1
+├── L2
+├── L2 squared
+├── L∞
+├── Lp
+├── distances
+└── normalization
+
+        ↓
+
+PHASE 3 — Matrix fundamentals
+│
+├── create/free
+├── get/set
+├── add/subtract
+├── scalar multiplication
+├── transpose
+├── matrix-vector multiply
+└── matrix-matrix multiply
+
+        ↓
+
+PHASE 4 — Linear algebra
+│
+├── row operations
+├── REF
+├── RREF
+├── Gaussian elimination
+├── solve Ax=b
+├── determinant
+└── inverse
+
+        ↓
+
+PHASE 5 — Statistics
+│
+├── variance
+├── standard deviation
+├── covariance
+└── covariance matrix
+
+        ↓
+
+PHASE 6 — Numerical linear algebra
+│
+├── LU
+├── QR
+├── Cholesky
+├── eigenvalues/eigenvectors
+└── SVD
+
+        ↓
+
+PHASE 7 — ML
+│
+├── Linear regression
+├── Logistic regression
+├── KNN
+├── K-means
+├── PCA
+├── Naive Bayes
+├── SVM
+└── Neural networks

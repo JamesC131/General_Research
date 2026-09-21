@@ -8,7 +8,7 @@
 typedef struct {
    size_t size;
    double *data;
-} Vector
+} Vector;
 
 //Basics
 Vector create_vector(size_t size);
@@ -26,13 +26,16 @@ void vector_divide(Vector *a, const Vector *b);
 double dot_product(const Vector *a, const Vector *b);
 
 //Norms
-double L1_norm(const Vector *a);
-double L2_norm(const Vector *a);
-double L2_sqaured(const Vector *a);
-double Linf_norm(const Vector *a);
+double vector_L1_norm(const Vector *v);
+double vector_L2_norm(const Vector *v);
+double vector_L2_squared(const Vector *v);
+double vector_Linf_norm(const Vector *v);
 
-double vector_distance(const Vector *a, const Vector *b);
+double vector_L1_distance(const Vector *a, const Vector *b);
+double vector_L2_distance(const Vector *a, const Vector *b);
+double vector_L2_squared_distance(const Vector *a, const Vector *b);
+double vector_Linf_distance(const Vector *a, const Vector *b);
 void vector_normalize(Vector *v);
-double vector_cosine_similarity(const Vector *a, Vector *b);
-Vector projection(const Vector *a, const Vector *b);
+double vector_cosine_similarity(const Vector *a, const Vector *b);
+Vector vector_projection(const Vector *a, const Vector *b);
 #endif
