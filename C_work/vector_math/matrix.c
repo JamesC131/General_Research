@@ -114,9 +114,26 @@ Matrix matrix_multiplication(const Matrix *a, const Matrix *b){
 
     Matrix *c = matrix_create(a->rows, b->cols);
 
-    for(size_t i = 0; i < c->rows; i++){
-       for(size_t j = 0; j < c->cols; j++){
-          c->data[i * c->cols + j] = a->data[i * a->cols + j] * b->data[i * b->>
+    for(size_t i = 0; i < a->rows; i++){
+       for(size_t j = 0; j < b->cols; j++){
+          for(size_t k = 0; k < a->cols; k++){
+             c->data[i * c->cols + j] = a->data[i * a->cols + k] * b->data[k * b->cols + j];
+
+          }
        }
     }
+ return c;
 }
+
+Matrix matrix_transpose(const Matrix *m){
+
+    Matrix *t = matrix_create(m->cols, m->rows);
+    for(size_t i = 0; i < m->rows; i++){
+      for(size_t j = 0; j < m->cols; j++){
+         t->data[j * t->rows + i] = m->data[i * m->cols + j];
+      }
+    }
+return t;
+}
+
+
