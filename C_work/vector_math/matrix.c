@@ -20,7 +20,7 @@ Matrix matrix_create(size_t rows, size_t cols){
 
 void matrix_free(Matrix *m){
     if(m == NULL){
-    return NULL;
+    return;
     }
 
     free(m->data);
@@ -53,11 +53,11 @@ Matrix matrix_random(size_t rows, size_t cols){
 }
 
 double matrix_get(const Matrix *m, size_t row, size_t col){
-    return m->data[row * m.cols + col];
+    return m->data[row * m->cols + col];
 }
 
-void matrix_get(Matrix *m, size_t row, size_t col, double value){
-    m->data[row * m.cols + col] = value;
+void matrix_set(Matrix *m, size_t row, size_t col, double value){
+    m->data[row * m->cols + col] = value;
 }
 
 void matrix_add(Matrix *a, const Matrix *b){
@@ -110,19 +110,29 @@ Matrix matrix_element_mul(const Matrix *a, const Matrix *b){
     }
 }
 
-Matrix matrix_multiplication(const Matrix *a, const Matrix *b){
-
-    Matrix *c = matrix_create(a->rows, b->cols);
-
-    for(size_t i = 0; i < a->rows; i++){
-       for(size_t j = 0; j < b->cols; j++){
-          for(size_t k = 0; k < a->cols; k++){
-             c->data[i * c->cols + j] = a->data[i * a->cols + k] * b->data[k * b->cols + j];
-
-          }
-       }
+Matrix matrix_multiplication(const Matrix *a, const Matrix *b)
+{
+    if (a->cols != b->rows) {
+        return NULL;
     }
- return c;
+
+    Matrix *c = matrix_zeros(a->rows, b->cols);
+
+    if (c == NULL) {
+        return NULL;
+    }
+
+    for (size_t i = 0; i < a->rows; i++) {
+        for (size_t j = 0; j < b->cols; j++) {
+            for (size_t k = 0; k < a->cols; k++) {
+                c->data[i * c->cols + j] +=
+                    a->data[i * a->cols + k] *
+                    b->data[k * b->cols + j];
+            }
+        }
+    }
+
+    return c;
 }
 
 Matrix matrix_transpose(const Matrix *m){
