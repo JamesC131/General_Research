@@ -54,9 +54,11 @@ Vector linear_regression_predict_batch(const LinearRegression *model, const Matr
 }
 
 
-double linear_regression_mse(const LinearRegression *model, const Matrix *X, const Vector *correct, const Vector *predicted){
+double linear_regression_mse(const LinearRegression *model, const Matrix *X, const Vector *correct){
 
+   Vector *predicted = linear_regression_predict_batch(model, X);
    double MSE = 0.0;
+
 
    for(size_t i = 0; i < X->rows; i++){
       MSE += (correct->data[i] - predicted->data[i]) * (correct->data[i] - predicted->data[i]);
@@ -64,8 +66,17 @@ double linear_regression_mse(const LinearRegression *model, const Matrix *X, con
    return (1 / X->rows) * MSE;
 }
 
-Vector linear_regression_gradient(const LinearRegression *model, const Matrix *X, const Vector *y);
+Vector linear_regression_gradient(const LinearRegression *model, const Matrix *X, const Vector *y){
 
+    double MSE = linear_regression_mse(model, X, y);
+
+    double bias_gradient = 2 * MSE;
+
+    Vector *predicted = linear_regression_predict_batch(model, X);
+    double weight_gradient = vector_create(X->cols);
+
+    for(size_t i = 0; i < X->rows; i++){
+       weight_gradient += vector_dot((y->data[i] - predicted->data[i]) * (y->data[i] - predicted[i])
 int linear_regression_fit_gradient_descent(LinearRegression *model, const Matrix *X, const Vector *y, double learning_rate, size_t epochs);
 
 int linear_regression_fit_normal_equation(LinearRegression *model, const Matrix *X, const Vector *y);
