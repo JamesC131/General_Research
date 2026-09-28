@@ -1,6 +1,8 @@
 #include "linear_regression.h"
 #include <stdio.h>
 #include <stdint.h>
+#include "../vector_math/vector.h"
+#include "../vector_math/matrix.h"
 
 
 //Basics
@@ -46,18 +48,18 @@ Vector linear_regression_predict_batch(const LinearRegression *model, const Matr
    Vector *output = vector_create(X->rows);
 
    for(size_t i = 0; i < X->rows; i++){
-     output->data[i] = linear_regression_predict(model, matrix_get_row(X, i);
+     output->data[i] = linear_regression_predict(model, matrix_get_row(X, i));
    }
-   return output;
+   return *output;
 }
 
 
 double linear_regression_mse(const LinearRegression *model, const Matrix *X, const Vector *correct, const Vector *predicted){
 
-   double MSE = 0.0
+   double MSE = 0.0;
 
    for(size_t i = 0; i < X->rows; i++){
-      MSE += (correct->data[i] - predicted->data[i]) * (correct->data[i] - predicted[i]);
+      MSE += (correct->data[i] - predicted->data[i]) * (correct->data[i] - predicted->data[i]);
    }
    return (1 / X->rows) * MSE;
 }

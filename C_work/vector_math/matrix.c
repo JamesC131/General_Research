@@ -2,13 +2,50 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <stdint.h>
+#include <string.h>
+#include <math.h>
 
 
-/*
- * Create a matrix with uninitialized data.
- */
+/* ============================================================
+ * Internal Helpers
+ * ============================================================ */
+
+static int matrix_valid(const Matrix *m)
+{
+    return m != NULL;
+}
+
+
+static int matrix_same_shape(const Matrix *a, const Matrix *b)
+{
+    if (a == NULL || b == NULL) {
+        return 0;
+    }
+
+    return a->rows == b->rows &&
+           a->cols == b->cols;
+}
+
+
+static int matrix_element_count(size_t rows,
+                                size_t cols,
+                                size_t *count)
+{
+    if (rows != 0 && cols > SIZE_MAX / rows) {
+        return 0;
+    }
+
+    *count = rows * cols;
+
+    return 1;
+}
+
+
+/* ============================================================
+ * Creation / Destruction
+ * ============================================================ */
+
 Matrix *matrix_create(size_t rows, size_t cols)
 {
     Matrix *m = malloc(sizeof(Matrix));
@@ -17,57 +54,36 @@ Matrix *matrix_create(size_t rows, size_t cols)
         return NULL;
     }
 
+    size_t elements;
+
+    if (!matrix_element_count(rows, cols, &elements)) {
+        free(m);
+        return NULL;
+    }
+
+    if (elements > SIZE_MAX / sizeof(double)) {
+        free(m);
+        return NULL;
+    }
+
     m->rows = rows;
     m->cols = cols;
     m->data = NULL;
 
-    /*
-     * Check for multiplication overflow before:
-     *
-     * rows * cols * sizeof(double)
-     */
-    if (rows != 0 &&
-        cols > SIZE_MAX / rows) {
-        free(m);
-        return NULL;
-    }
+    if (elements > 0) {
 
-    size_t elements = rows * cols;
+        m->data = malloc(elements * sizeof(double));
 
-    if (elements != 0 &&
-        elements > SIZE_MAX / sizeof(double)) {
-        free(m);
-        return NULL;
-    }
-
-    m->data = malloc(elements * sizeof(double));
-
-    if (m->data == NULL && elements != 0) {
-        free(m);
-        return NULL;
+        if (m->data == NULL) {
+            free(m);
+            return NULL;
+        }
     }
 
     return m;
 }
 
 
-/*
- * Free a matrix.
- */
-void matrix_free(Matrix *m)
-{
-    if (m == NULL) {
-        return;
-    }
-
-    free(m->data);
-    free(m);
-}
-
-
-/*
- * Create a matrix filled with zeros.
- */
 Matrix *matrix_zeros(size_t rows, size_t cols)
 {
     Matrix *m = matrix_create(rows, cols);
@@ -78,17 +94,30 @@ Matrix *matrix_zeros(size_t rows, size_t cols)
 
     size_t elements = rows * cols;
 
-    for (size_t i = 0; i < elements; i++) {
-        m->data[i] = 0.0;
+    if (elements > 0) {
+        memset(m->data, 0, elements * sizeof(double));
     }
 
     return m;
 }
 
 
-/*
- * Generate a random double between min and max.
- */
+Matrix *matrix_identity(size_t n)
+{
+    Matrix *m = matrix_zeros(n, n);
+
+    if (m == NULL) {
+        return NULL;
+    }
+
+    for (size_t i = 0; i < n; i++) {
+        m->data[i * n + i] = 1.0;
+    }
+
+    return m;
+}
+
+
 static double random_double(double min, double max)
 {
     return min +
@@ -97,9 +126,6 @@ static double random_double(double min, double max)
 }
 
 
-/*
- * Create a matrix with random values between -1 and 1.
- */
 Matrix *matrix_random(size_t rows, size_t cols)
 {
     Matrix *m = matrix_create(rows, cols);
@@ -118,14 +144,34 @@ Matrix *matrix_random(size_t rows, size_t cols)
 }
 
 
-/*
- * Get an element.
- */
+void matrix_random_seed(unsigned int seed)
+{
+    srand(seed);
+}
+
+
+void matrix_free(Matrix *m)
+{
+    if (m == NULL) {
+        return;
+    }
+
+    free(m->data);
+    free(m);
+}
+
+
+/* ============================================================
+ * Element Access
+ * ============================================================ */
+
 double matrix_get(const Matrix *m, size_t row, size_t col)
 {
-    if (m == NULL ||
-        row >= m->rows ||
-        col >= m->cols) {
+    if (m == NULL) {
+        return 0.0;
+    }
+
+    if (row >= m->rows || col >= m->cols) {
         return 0.0;
     }
 
@@ -133,14 +179,16 @@ double matrix_get(const Matrix *m, size_t row, size_t col)
 }
 
 
-/*
- * Set an element.
- */
-void matrix_set(Matrix *m, size_t row, size_t col, double value)
+void matrix_set(Matrix *m,
+                size_t row,
+                size_t col,
+                double value)
 {
-    if (m == NULL ||
-        row >= m->rows ||
-        col >= m->cols) {
+    if (m == NULL) {
+        return;
+    }
+
+    if (row >= m->rows || col >= m->cols) {
         return;
     }
 
@@ -148,18 +196,14 @@ void matrix_set(Matrix *m, size_t row, size_t col, double value)
 }
 
 
-/*
- * a += b
- */
-void matrix_add(Matrix *a, const Matrix *b)
-{
-    if (a == NULL || b == NULL) {
-        return;
-    }
+/* ============================================================
+ * Basic In-Place Arithmetic
+ * ============================================================ */
 
-    if (a->rows != b->rows ||
-        a->cols != b->cols) {
-        return;
+int matrix_add(Matrix *a, const Matrix *b)
+{
+    if (!matrix_same_shape(a, b)) {
+        return 0;
     }
 
     size_t elements = a->rows * a->cols;
@@ -167,21 +211,15 @@ void matrix_add(Matrix *a, const Matrix *b)
     for (size_t i = 0; i < elements; i++) {
         a->data[i] += b->data[i];
     }
+
+    return 1;
 }
 
 
-/*
- * a -= b
- */
-void matrix_subtract(Matrix *a, const Matrix *b)
+int matrix_subtract(Matrix *a, const Matrix *b)
 {
-    if (a == NULL || b == NULL) {
-        return;
-    }
-
-    if (a->rows != b->rows ||
-        a->cols != b->cols) {
-        return;
+    if (!matrix_same_shape(a, b)) {
+        return 0;
     }
 
     size_t elements = a->rows * a->cols;
@@ -189,12 +227,11 @@ void matrix_subtract(Matrix *a, const Matrix *b)
     for (size_t i = 0; i < elements; i++) {
         a->data[i] -= b->data[i];
     }
+
+    return 1;
 }
 
 
-/*
- * a *= scalar
- */
 void matrix_scale(Matrix *a, double scalar)
 {
     if (a == NULL) {
@@ -209,17 +246,13 @@ void matrix_scale(Matrix *a, double scalar)
 }
 
 
-/*
- * Return a + b as a new matrix.
- */
+/* ============================================================
+ * Matrix-Producing Arithmetic
+ * ============================================================ */
+
 Matrix *matrix_add_new(const Matrix *a, const Matrix *b)
 {
-    if (a == NULL || b == NULL) {
-        return NULL;
-    }
-
-    if (a->rows != b->rows ||
-        a->cols != b->cols) {
+    if (!matrix_same_shape(a, b)) {
         return NULL;
     }
 
@@ -239,17 +272,9 @@ Matrix *matrix_add_new(const Matrix *a, const Matrix *b)
 }
 
 
-/*
- * Return a - b as a new matrix.
- */
 Matrix *matrix_subtract_new(const Matrix *a, const Matrix *b)
 {
-    if (a == NULL || b == NULL) {
-        return NULL;
-    }
-
-    if (a->rows != b->rows ||
-        a->cols != b->cols) {
+    if (!matrix_same_shape(a, b)) {
         return NULL;
     }
 
@@ -269,28 +294,9 @@ Matrix *matrix_subtract_new(const Matrix *a, const Matrix *b)
 }
 
 
-/*
- * Element-wise multiplication.
- *
- * Example:
- *
- * A = [1 2]
- *     [3 4]
- *
- * B = [5 6]
- *     [7 8]
- *
- * C = [5  12]
- *     [21 32]
- */
 Matrix *matrix_element_mul(const Matrix *a, const Matrix *b)
 {
-    if (a == NULL || b == NULL) {
-        return NULL;
-    }
-
-    if (a->rows != b->rows ||
-        a->cols != b->cols) {
+    if (!matrix_same_shape(a, b)) {
         return NULL;
     }
 
@@ -311,25 +317,52 @@ Matrix *matrix_element_mul(const Matrix *a, const Matrix *b)
 }
 
 
-/*
- * Matrix multiplication.
- *
- * A: rows x cols
- * B: rows x cols
- *
- * For multiplication:
- *
- * A.cols must equal B.rows
- *
- * Result:
- *
- * A.rows x B.cols
- */
-Matrix *matrix_multiplication(const Matrix *a, const Matrix *b)
+Matrix *matrix_element_div(const Matrix *a, const Matrix *b)
+{
+    if (!matrix_same_shape(a, b)) {
+        return NULL;
+    }
+
+    Matrix *c = matrix_create(a->rows, a->cols);
+
+    if (c == NULL) {
+        return NULL;
+    }
+
+    size_t elements = a->rows * a->cols;
+
+    for (size_t i = 0; i < elements; i++) {
+
+        if (b->data[i] == 0.0) {
+            matrix_free(c);
+            return NULL;
+        }
+
+        c->data[i] =
+            a->data[i] / b->data[i];
+    }
+
+    return c;
+}
+
+
+/* ============================================================
+ * Matrix Multiplication
+ * ============================================================ */
+
+Matrix *matrix_multiplication(const Matrix *a,
+                              const Matrix *b)
 {
     if (a == NULL || b == NULL) {
         return NULL;
     }
+
+    /*
+     * A: m x n
+     * B: n x p
+     *
+     * C: m x p
+     */
 
     if (a->cols != b->rows) {
         return NULL;
@@ -362,20 +395,10 @@ Matrix *matrix_multiplication(const Matrix *a, const Matrix *b)
 }
 
 
-/*
- * Transpose a matrix.
- *
- * A:
- *
- * [1 2 3]
- * [4 5 6]
- *
- * becomes:
- *
- * [1 4]
- * [2 5]
- * [3 6]
- */
+/* ============================================================
+ * Transpose
+ * ============================================================ */
+
 Matrix *matrix_transpose(const Matrix *m)
 {
     if (m == NULL) {
@@ -401,9 +424,422 @@ Matrix *matrix_transpose(const Matrix *m)
 }
 
 
-/*
- * Sum all elements.
- */
+/* ============================================================
+ * Matrix Properties
+ * ============================================================ */
+
+int matrix_is_square(const Matrix *m)
+{
+    if (m == NULL) {
+        return 0;
+    }
+
+    return m->rows == m->cols;
+}
+
+
+int matrix_is_identity(const Matrix *m, double tolerance)
+{
+    if (!matrix_is_square(m)) {
+        return 0;
+    }
+
+    for (size_t i = 0; i < m->rows; i++) {
+
+        for (size_t j = 0; j < m->cols; j++) {
+
+            double expected =
+                (i == j) ? 1.0 : 0.0;
+
+            if (fabs(m->data[i * m->cols + j] - expected)
+                > tolerance) {
+                return 0;
+            }
+        }
+    }
+
+    return 1;
+}
+
+
+/* ============================================================
+ * Row / Column Operations
+ * ============================================================ */
+
+int matrix_swap_rows(Matrix *m,
+                     size_t row1,
+                     size_t row2)
+{
+    if (m == NULL) {
+        return 0;
+    }
+
+    if (row1 >= m->rows ||
+        row2 >= m->rows) {
+        return 0;
+    }
+
+    if (row1 == row2) {
+        return 1;
+    }
+
+    for (size_t j = 0; j < m->cols; j++) {
+
+        double temp =
+            m->data[row1 * m->cols + j];
+
+        m->data[row1 * m->cols + j] =
+            m->data[row2 * m->cols + j];
+
+        m->data[row2 * m->cols + j] =
+            temp;
+    }
+
+    return 1;
+}
+
+
+int matrix_swap_cols(Matrix *m,
+                     size_t col1,
+                     size_t col2)
+{
+    if (m == NULL) {
+        return 0;
+    }
+
+    if (col1 >= m->cols ||
+        col2 >= m->cols) {
+        return 0;
+    }
+
+    if (col1 == col2) {
+        return 1;
+    }
+
+    for (size_t i = 0; i < m->rows; i++) {
+
+        double temp =
+            m->data[i * m->cols + col1];
+
+        m->data[i * m->cols + col1] =
+            m->data[i * m->cols + col2];
+
+        m->data[i * m->cols + col2] =
+            temp;
+    }
+
+    return 1;
+}
+
+
+/* ============================================================
+ * Determinant
+ * ============================================================ */
+
+double matrix_determinant(const Matrix *m)
+{
+    if (!matrix_is_square(m)) {
+        return NAN;
+    }
+
+    size_t n = m->rows;
+
+    if (n == 0) {
+        return 1.0;
+    }
+
+    if (n == 1) {
+        return m->data[0];
+    }
+
+    if (n == 2) {
+
+        return
+            m->data[0] * m->data[3] -
+            m->data[1] * m->data[2];
+    }
+
+    /*
+     * Use Gaussian elimination with partial pivoting.
+     *
+     * det(A) = product of pivots
+     *
+     * Each row swap changes the sign.
+     */
+
+    Matrix *a = matrix_create(n, n);
+
+    if (a == NULL) {
+        return NAN;
+    }
+
+    memcpy(a->data,
+           m->data,
+           n * n * sizeof(double));
+
+    double determinant = 1.0;
+    int sign = 1;
+
+    const double tolerance = 1e-12;
+
+    for (size_t col = 0; col < n; col++) {
+
+        /*
+         * Find largest pivot.
+         */
+        size_t pivot = col;
+        double max_value =
+            fabs(a->data[col * n + col]);
+
+        for (size_t row = col + 1;
+             row < n;
+             row++) {
+
+            double value =
+                fabs(a->data[row * n + col]);
+
+            if (value > max_value) {
+                max_value = value;
+                pivot = row;
+            }
+        }
+
+        /*
+         * Singular matrix.
+         */
+        if (max_value < tolerance) {
+            matrix_free(a);
+            return 0.0;
+        }
+
+        /*
+         * Swap rows if necessary.
+         */
+        if (pivot != col) {
+
+            matrix_swap_rows(a, pivot, col);
+
+            sign *= -1;
+        }
+
+        double pivot_value =
+            a->data[col * n + col];
+
+        determinant *= pivot_value;
+
+        /*
+         * Eliminate below pivot.
+         */
+        for (size_t row = col + 1;
+             row < n;
+             row++) {
+
+            double factor =
+                a->data[row * n + col] /
+                pivot_value;
+
+            for (size_t j = col;
+                 j < n;
+                 j++) {
+
+                a->data[row * n + j] -=
+                    factor *
+                    a->data[col * n + j];
+            }
+        }
+    }
+
+    matrix_free(a);
+
+    return determinant * sign;
+}
+
+
+/* ============================================================
+ * Matrix Inverse
+ *
+ * Gauss-Jordan elimination:
+ *
+ * [ A | I ]
+ *
+ * becomes
+ *
+ * [ I | A^-1 ]
+ * ============================================================ */
+
+Matrix *matrix_inverse(const Matrix *m)
+{
+    if (!matrix_is_square(m)) {
+        return NULL;
+    }
+
+    size_t n = m->rows;
+
+    if (n == 0) {
+        return NULL;
+    }
+
+    /*
+     * Augmented matrix:
+     *
+     * [ A | I ]
+     *
+     * Dimensions:
+     *
+     * n x 2n
+     */
+
+    if (n > SIZE_MAX / 2) {
+        return NULL;
+    }
+
+    Matrix *aug =
+        matrix_create(n, 2 * n);
+
+    if (aug == NULL) {
+        return NULL;
+    }
+
+    /*
+     * Copy A.
+     */
+    for (size_t i = 0; i < n; i++) {
+
+        for (size_t j = 0; j < n; j++) {
+
+            aug->data[i * aug->cols + j] =
+                m->data[i * m->cols + j];
+        }
+    }
+
+    /*
+     * Create identity matrix on right.
+     */
+    for (size_t i = 0; i < n; i++) {
+
+        aug->data[
+            i * aug->cols + (n + i)
+        ] = 1.0;
+    }
+
+    const double tolerance = 1e-12;
+
+    /*
+     * Gauss-Jordan elimination.
+     */
+    for (size_t col = 0; col < n; col++) {
+
+        /*
+         * Find pivot.
+         */
+        size_t pivot = col;
+
+        double max_value =
+            fabs(aug->data[
+                col * aug->cols + col
+            ]);
+
+        for (size_t row = col + 1;
+             row < n;
+             row++) {
+
+            double value =
+                fabs(aug->data[
+                    row * aug->cols + col
+                ]);
+
+            if (value > max_value) {
+                max_value = value;
+                pivot = row;
+            }
+        }
+
+        /*
+         * Singular matrix.
+         */
+        if (max_value < tolerance) {
+            matrix_free(aug);
+            return NULL;
+        }
+
+        /*
+         * Move pivot row into position.
+         */
+        if (pivot != col) {
+            matrix_swap_rows(aug, pivot, col);
+        }
+
+        /*
+         * Normalize pivot row.
+         */
+        double pivot_value =
+            aug->data[col * aug->cols + col];
+
+        for (size_t j = 0;
+             j < 2 * n;
+             j++) {
+
+            aug->data[col * aug->cols + j] /=
+                pivot_value;
+        }
+
+        /*
+         * Eliminate this column
+         * from every other row.
+         */
+        for (size_t row = 0;
+             row < n;
+             row++) {
+
+            if (row == col) {
+                continue;
+            }
+
+            double factor =
+                aug->data[row * aug->cols + col];
+
+            for (size_t j = 0;
+                 j < 2 * n;
+                 j++) {
+
+                aug->data[row * aug->cols + j] -=
+                    factor *
+                    aug->data[col * aug->cols + j];
+            }
+        }
+    }
+
+    /*
+     * Extract right half.
+     */
+    Matrix *inverse = matrix_create(n, n);
+
+    if (inverse == NULL) {
+        matrix_free(aug);
+        return NULL;
+    }
+
+    for (size_t i = 0; i < n; i++) {
+
+        for (size_t j = 0; j < n; j++) {
+
+            inverse->data[i * n + j] =
+                aug->data[
+                    i * aug->cols + (n + j)
+                ];
+        }
+    }
+
+    matrix_free(aug);
+
+    return inverse;
+}
+
+
+/* ============================================================
+ * Statistics / Utilities
+ * ============================================================ */
+
 double matrix_sum(const Matrix *m)
 {
     if (m == NULL) {
@@ -421,9 +857,6 @@ double matrix_sum(const Matrix *m)
 }
 
 
-/*
- * Mean of all elements.
- */
 double matrix_mean(const Matrix *m)
 {
     if (m == NULL) {
@@ -440,16 +873,6 @@ double matrix_mean(const Matrix *m)
 }
 
 
-/*
- * Sum of squares.
- *
- * Useful for:
- *
- * MSE
- * L2 regularization
- * vector norms
- * loss functions
- */
 double matrix_sum_squares(const Matrix *m)
 {
     if (m == NULL) {
@@ -460,16 +883,16 @@ double matrix_sum_squares(const Matrix *m)
     double sum = 0.0;
 
     for (size_t i = 0; i < elements; i++) {
-        sum += m->data[i] * m->data[i];
+
+        sum +=
+            m->data[i] *
+            m->data[i];
     }
 
     return sum;
 }
 
 
-/*
- * Fill an entire matrix with a value.
- */
 void matrix_fill(Matrix *m, double value)
 {
     if (m == NULL) {
@@ -484,11 +907,10 @@ void matrix_fill(Matrix *m, double value)
 }
 
 
-/*
- * Print a matrix.
- *
- * Useful for debugging.
- */
+/* ============================================================
+ * Printing
+ * ============================================================ */
+
 void matrix_print(const Matrix *m)
 {
     if (m == NULL) {
