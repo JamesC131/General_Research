@@ -1,0 +1,423 @@
+###############################################################################
+# native_cleaner.soar  —  a NATIVE Soar model of self-control (draft v0)
+#
+# Same task as the CLARION cleaning robot, but built only from Soar's own
+# mechanisms. Nothing here copies CLARION's equations: there are no drives,
+# no explicitness utility and no cost term.
+#
+#   Habit       Soar-RL. Numeric preferences for the five behaviours, learned
+#               from experience with reward = dirt cleaned (any room). The
+#               habit does not know which rooms are assigned.
+#   Temptation  is PROPOSED like any other option (unlike the student's
+#               rules, which filtered it out).
+#   Conflict    task knowledge marks options that are off-task or break a
+#               constraint. A proposed off-task option is a conflict.
+#   Control     a conflict triggers the operator `deliberate`. It has no
+#               apply rule, so Soar creates an operator no-change substate
+#               (the "evaluation" problem space). There each candidate is
+#               evaluated against the task, one decision cycle per
+#               candidate, and `conclude` returns control knowledge
+#               (^control: reject / prefer) to the top state.
+#   Capacity    deliberation takes decision cycles. If the robot must act
+#               before it is done (^time-up true from the bridge), the
+#               substate is abandoned and the habit chooses.
+#   Learning    chunking compiles each deliberation into a rule, so the same
+#               conflict later costs one decision instead of several.
+#
+# One robot cycle:  begin-cycle -> [deliberate -> evaluate* -> conclude]
+#                   -> behaviour  (output ^command with ^cycle N)
+###############################################################################
+
+###############################################################################
+# INITIALIZE AND BEGIN A CYCLE
+###############################################################################
+
+
+#checks whether the top state is initialized, if not, it proposes the initialize operator
+sp {propose*initialize
+   (state <s> ^superstate nil -^stage) #for top level state with no stage attribute
+-->
+   (<s> ^operator <o> + >) #connect the state to a new operator, + make it acceptable and preferable, > make it more preferable than any other operator in the state
+   (<o> ^name initialize) # name that operator initialize
+}
+
+#actually runs and applies the initialize operator, setting the stage to idle and done-cycle to -1
+sp {apply*initialize     #apply means the operator is selected and its action is executed
+   (state <s> ^operator.name initialize)  #if the state has an operator named initialize
+-->
+   (<s> ^stage idle ^done-cycle -1)    #set the stage to idle and done-cycle to -1
+}
+
+
+sp {propose*begin-cycle
+   (state <s> ^stage idle ^done-cycle <d> ^io.input-link.cycle {<n> <> <d>})  #check if the stage in the state is idle, the done-cycle is <d>, and the input-link cycle is <n> and not equal to comlpeted cycles
+-->
+   (<s> ^operator <o> + >)   #assign a new operator to the state, make it acceptable and preferable to the others
+   (<o> ^name begin-cycle ^cycle <n>)  #name the operator begin-cycle and assign the cycle number to it
+}
+
+sp {apply*begin-cycle
+   (state <s> ^operator <o>)  #if the state has an operator <o>
+   (<o> ^name begin-cycle ^cycle <n>) #if the operator <o> has the name begin-cycle and cycle number <n>
+-->
+   (<s> ^stage idle - ^stage behave ^cycle <n>)  #set the stage to behave, remove the idle stage, and set the cycle number to <n>
+}
+
+sp {apply*begin-cycle*clear      
+   (state <s> ^operator.name begin-cycle ^stage idle        #if the state has an operator named begin-cycle and the stage is idle
+              ^{<a> << cycle control deliberated >>} <v>) # has an attribute of either cycle, control, or deliberated with value <v>
+-->
+   (<s> ^<a> <v> -)  #remove whatever attribute was present (cycle, control, or deliberated) from the state
+}
+
+sp {apply*begin-cycle*clear-command
+   (state <s> ^operator.name begin-cycle ^io.output-link <ol>) #if the state has an operator named begin-cycle and an output-link <ol>
+   (<ol> ^command <c>) # and the output-link has a command <c>
+-->
+   (<ol> ^command <c> -) #remove the command from the output-link
+}
+
+# reward for the habit: dirt cleaned since the last decision (read once per cycle)
+sp {elaborate*reward
+   (state <s> ^reward-link <rl> ^stage idle ^io.input-link <il>) #if the state has a reward-link <rl>, the stage is idle, and an input-link <il>
+   (<il> ^reward <r> ^learning on) # and the input-link has a reward <r> and learning is on
+-->
+   (<rl> ^reward.value <r>) #set the reward value in the reward-link to <r>
+}
+
+###############################################################################
+# BEHAVIOURS: proposed whenever the world affords them
+###############################################################################
+
+sp {propose*clean
+   (state <s> ^stage behave ^io.input-link.in-assigned-with-dirt true) #if the state has a stage behave and the input-link says the robot is in an assigned room with dirt
+-->
+   (<s> ^operator <o1> + ^operator <o2> +) #assign two new operators to the state, make them acceptable
+   (<o1> ^name clean_quiet ^behaviour true) #tell the robot that it can clean in a quiet mode
+   (<o2> ^name clean_full ^behaviour true) #tell the robot that it can clean in a full suction mode
+}
+
+sp {propose*next-room
+   (state <s> ^stage behave ^io.input-link <il>)
+   (<il> ^in-assigned-with-dirt false ^assigned-done false) #if the robot is not in an assigned room with dirt and the assigned task is not done
+-->
+   (<s> ^operator <o> +)
+   (<o> ^name next_room ^behaviour true) #tell the robot that it can move to the next room
+}
+
+sp {propose*detour
+   (state <s> ^stage behave ^io.input-link.temptation-level {<> none}) #if the robot is in the behavior stage and temptation is anything other than none
+-->
+   (<s> ^operator <o> +)
+   (<o> ^name detour ^behaviour true) #propose the detour action as a choice the robot can make
+}
+
+sp {propose*dock
+   (state <s> ^stage behave)
+-->
+   (<s> ^operator <o> +)
+   (<o> ^name dock ^behaviour true) #tell the robot that it can dock at anytime
+}
+
+###############################################################################
+# HABIT: Soar-RL. One learned value per (situation, behaviour); the template
+# creates a rule the first time a combination is seen.
+###############################################################################
+
+sp {rl*habit
+   :template
+   (state <s> ^stage behave ^io.input-link <il> ^operator <o> +)
+   (<il> ^in-assigned-with-dirt <a> ^quiet-zone <q> ^temptation-level <t>
+         ^temptation-dist <d> ^battery-level <b> ^assigned-done <x>)
+   (<o> ^name <n> ^behaviour true)   #if the robot is in the behavior stage, has an input-link with various attributes, and has an operator with a name and behavior
+-->
+   (<s> ^operator <o> = 0.0) #set the preference to 0 so the robot is indifferent with a value of 0
+}
+
+###############################################################################
+# TASK KNOWLEDGE: what the assigned task is (symbolic, explicit)
+###############################################################################
+
+# room C is not assigned: going there is off-task
+sp {task*off-task*detour
+   (state <s> ^operator <o> +)  #check if the state has detour as a considered operator
+   (<o> ^name detour)
+-->
+   (<s> ^conflict <c>)
+   (<c> ^operator detour ^kind off-task)  #record that detour is off-task in the conflict structure
+}
+
+# full suction in a quiet zone breaks a constraint
+sp {task*violation*quiet
+   (state <s> ^operator <o> + ^io.input-link.quiet-zone true)
+   (<o> ^name clean_full)  #if the robot is in a quiet zone and the operator is clean_full
+-->
+   (<s> ^conflict <c>)
+   (<c> ^operator clean_full ^kind constraint) #record that clean_full is a constraint violation in the conflict structure
+}
+
+# docking with work left and enough battery is not progress
+sp {task*off-task*early-dock
+   (state <s> ^operator <o> + ^io.input-link <il>)
+   (<il> ^assigned-done false ^battery-level << mid high >>) #if the robot is not done with its assigned task and has mid or high battery
+   (<o> ^name dock)
+-->
+   (<s> ^conflict <c>)
+   (<c> ^operator dock ^kind off-task) #log that docking is off-task in the conflict structure
+}
+
+# low battery while working: not docking is a risk
+sp {task*risk*battery
+   (state <s> ^operator <o> + ^io.input-link <il>)
+   (<il> ^battery-level low ^assigned-done false) #if the robot has low battery and is not done with its assigned task and is not docking
+   (<o> ^name {<n> <> dock} ^behaviour true)
+-->
+   (<s> ^conflict <c>)
+   (<c> ^operator <n> ^kind risk) #log that any behavior other than docking is a risk in the conflict structure
+}
+
+###############################################################################
+# CONTROL: deliberate when there is a conflict and no control knowledge yet,
+# unless the robot has run out of time for this cycle.
+###############################################################################
+
+# one flag, however many conflicts (so only one `deliberate` is proposed)
+sp {elaborate*conflict-present
+   (state <s> ^conflict <c>) #if the state has a conflict <c>
+-->
+   (<s> ^conflict-present true) #set the conflict-present flag to true in the state
+}
+
+sp {propose*deliberate
+   (state <s> ^stage behave ^conflict-present true -^control
+              ^io.input-link <il>)
+   (<il> ^time-up false ^mode << native always >>)   #if the robot is in the behavior stage, has a conflict present, has no control knowledge yet, and has time left for this cycle
+-->
+   (<s> ^operator <o> + >)
+   (<o> ^name deliberate) #then propose the deliberate operator as a choice for the robot
+}
+
+# marks that deliberation started this cycle (the operator stays selected,
+# makes no further change, and so still leads to the evaluation substate)
+sp {apply*deliberate*mark
+   (state <s> ^operator.name deliberate -^deliberated)
+-->
+   (<s> ^deliberated true)
+}
+
+# ablation "always": deliberate every cycle, conflict or not
+sp {propose*deliberate*always
+   (state <s> ^stage behave -^control -^conflict-present ^io.input-link <il>) #if the robot is in the behavior stage, has no control knowledge yet, has no conflict present, and has time left for this cycle
+   (<il> ^time-up false ^mode always)
+-->
+   (<s> ^operator <o> + >)
+   (<o> ^name deliberate) #propose the deliberate operator as a choice for the robot with a strong preference
+}
+
+# control knowledge -> preferences
+sp {control*reject
+   (state <s> ^control.reject <n> ^operator <o> +) #if the state has a control knowledge that rejects <n> and has an operator <o>
+   (<o> ^name <n>)
+-->
+   (<s> ^operator <o> -) #remove the operator <o> from the state, effectively rejecting it
+}
+
+sp {control*prefer
+   (state <s> ^control.prefer <n> ^operator <o> +) #if the state has a control knowledge that prefers <n> and has an operator <o>
+   (<o> ^name <n>)
+-->
+   (<s> ^operator <o> >) #make the operator <o> more preferable than any other operator in the state
+}
+
+###############################################################################
+# THE EVALUATION SUBSTATE (operator no-change on `deliberate`)
+###############################################################################
+
+sp {eval*elaborate*candidate
+   (state <ss> ^superstate <s>)
+   (<s> ^operator.name deliberate ^operator <c> +) #if there substate <ss> has a superstate <s> with an operator named deliberate and a candidate operator <c>
+   (<c> ^name <n> ^behaviour true)
+-->
+   (<ss> ^candidate <n>) #add the candidate operator <n> to the substate <ss>
+}
+
+sp {eval*propose*evaluate
+   (state <ss> ^candidate <n> -^evaluation.operator <n>) #for a substate <ss> with a candidate <n> that has not yet been evaluated
+-->
+   (<ss> ^operator <o> + =)
+   (<o> ^name evaluate ^candidate <n>) #propose the evaluate operator for the candidate <n> in the substate <ss>
+}
+
+# --- task value of each behaviour (one evaluation per decision cycle) ---------
+# progress on the assigned rooms
+sp {eval*apply*clean-quiet
+   (state <ss> ^operator <o>)
+   (<o> ^name evaluate ^candidate clean_quiet) #if the substate <ss> has an operator <o> with the name evaluate and a candidate clean_quiet
+-->
+   (<ss> ^evaluation <e>) (<e> ^operator clean_quiet ^value 0.9) #assign a value of 0.9 to the evaluation of clean_quiet in the substate <ss>
+}
+
+sp {eval*apply*clean-full*normal
+   (state <ss> ^operator <o> ^superstate.io.input-link.quiet-zone false) #if the substate <ss> has an operator <o> with the name evaluate and a candidate clean_full, and the superstate's input-link indicates that the robot is not in a quiet zone
+   (<o> ^name evaluate ^candidate clean_full)
+-->
+   (<ss> ^evaluation <e>) (<e> ^operator clean_full ^value 1.0) #tell the robot that clean_full has a value of 1.0 in the evaluation of the substate <ss>
+}
+
+sp {eval*apply*clean-full*quiet
+   (state <ss> ^operator <o> ^superstate.io.input-link.quiet-zone true)
+   (<o> ^name evaluate ^candidate clean_full)
+-->
+   (<ss> ^evaluation <e>) (<e> ^operator clean_full ^value -1.0) #if youa re in a quiet zone punish the full clean choice
+}
+
+sp {eval*apply*next-room
+   (state <ss> ^operator <o>)
+   (<o> ^name evaluate ^candidate next_room)
+-->
+   (<ss> ^evaluation <e>) (<e> ^operator next_room ^value 0.8)
+}
+
+sp {eval*apply*detour
+   (state <ss> ^operator <o>)
+   (<o> ^name evaluate ^candidate detour)
+-->
+   (<ss> ^evaluation <e>) (<e> ^operator detour ^value -1.0) #always punish detour because it is off-task, even if the temptation is high
+}
+
+sp {eval*apply*dock*needed
+   (state <ss> ^operator <o> ^superstate.io.input-link <il>)
+   (<il> ^battery-level low)
+   (<o> ^name evaluate ^candidate dock)
+-->
+   (<ss> ^evaluation <e>) (<e> ^operator dock ^value 1.5) #hihgly reward docking when battery is low
+}
+
+sp {eval*apply*dock*done
+   (state <ss> ^operator <o> ^superstate.io.input-link <il>)
+   (<il> ^battery-level << mid high >> ^assigned-done true)
+   (<o> ^name evaluate ^candidate dock)
+-->
+   (<ss> ^evaluation <e>) (<e> ^operator dock ^value 1.0) #also reward docking when the assigned task is done and battery is not low
+}
+
+sp {eval*apply*dock*early
+   (state <ss> ^operator <o> ^superstate.io.input-link <il>)
+   (<il> ^battery-level << mid high >> ^assigned-done false)
+   (<o> ^name evaluate ^candidate dock)
+-->
+   (<ss> ^evaluation <e>) (<e> ^operator dock ^value -0.5) #penalize docking when the assigned task is not done and battery is not low
+}
+
+# low battery: everything except docking is risky
+sp {eval*apply*risk
+   (state <ss> ^operator <o> ^superstate.io.input-link <il>)
+   (<il> ^battery-level low ^assigned-done false)
+   (<o> ^name evaluate ^candidate {<n> <> dock})
+-->
+   (<ss> ^risky <n>) #label all behaviors except docking as risky when battery is low and assigned task is not done
+}
+
+# --- summarize, then conclude ------------------------------------------------
+# The control structure is first built locally (several rules, several waves),
+# then handed to the top state in ONE step. (A result resolves the impasse at
+# once and the substate disappears, so it must be complete when it is returned.)
+sp {eval*propose*summarize
+   (state <ss> ^superstate <s> -^summary-complete)
+   (<s> ^operator.name deliberate)
+  -{(<ss> ^candidate <n>)
+    -(<ss> ^evaluation.operator <n>)}
+-->
+   (<ss> ^operator <o> + >)
+   (<o> ^name summarize)
+}
+
+sp {eval*apply*summarize
+   (state <ss> ^operator.name summarize -^summary)
+-->
+   (<ss> ^summary <c>)
+   (<c> ^from deliberation)
+}
+
+# second wave: the summary is filled (rules below) and marked complete
+sp {eval*apply*summarize*complete
+   (state <ss> ^operator.name summarize ^summary <c>)
+-->
+   (<ss> ^summary-complete true)
+}
+
+sp {eval*apply*summarize*reject
+   (state <ss> ^operator.name summarize ^summary <c> ^evaluation <e>)
+   (<e> ^operator <n> ^value < 0.0)
+-->
+   (<c> ^reject <n>)
+}
+
+sp {eval*apply*summarize*reject-risky
+   (state <ss> ^operator.name summarize ^summary <c> ^risky <n>)
+-->
+   (<c> ^reject <n>)
+}
+
+sp {eval*apply*summarize*prefer
+   (state <ss> ^operator.name summarize ^summary <c> ^evaluation <e>)
+   (<e> ^operator <n> ^value {<v> > 0.0})
+  -{(<ss> ^evaluation <e2>)
+    (<e2> ^value > <v>)}  #ensure there isnt another vcandidate with a higher value than the current one
+  -(<ss> ^risky <n>)
+-->
+   (<c> ^prefer <n>)
+}
+
+sp {eval*propose*conclude
+   (state <ss> ^summary-complete true ^superstate <s>)
+   (<s> ^operator.name deliberate)
+-->
+   (<ss> ^operator <o> + >)
+   (<o> ^name conclude) #conclude the substate and return control knowledge to the top state
+}
+
+sp {eval*apply*conclude
+   (state <ss> ^operator.name conclude ^superstate <s> ^summary <c>)
+-->
+   (<s> ^control <c>)
+}
+
+###############################################################################
+# ACT: the selected behaviour goes to the output-link
+###############################################################################
+
+sp {apply*behaviour
+   (state <s> ^operator <o> ^io.output-link <ol> ^cycle <n> ^done-cycle <old>)
+   (<o> ^name <name> ^behaviour true)
+-->
+   (<ol> ^command <cmd>)
+   (<cmd> ^cycle <n> ^option <name>)
+   (<s> ^stage behave - ^stage idle ^done-cycle <old> - ^done-cycle <n>)
+}
+
+# record whether control knowledge shaped this choice (for the logs)
+# (these fire in the same wave as apply*behaviour: the behaviour operator
+#  retracts as soon as ^stage changes, so there is no second wave)
+sp {apply*behaviour*report-control
+   (state <s> ^operator <o> ^io.output-link <ol> ^control <c> ^cycle <n>)
+   (<o> ^behaviour true)
+-->
+   (<ol> ^report <r>)
+   (<r> ^cycle <n> ^controlled true)
+}
+
+sp {apply*behaviour*report-deliberation
+   (state <s> ^operator <o> ^io.output-link <ol> ^deliberated true ^cycle <n>)
+   (<o> ^behaviour true)
+-->
+   (<ol> ^report <r>)
+   (<r> ^cycle <n> ^deliberated true)
+}
+
+sp {apply*begin-cycle*clear-report
+   (state <s> ^operator.name begin-cycle ^io.output-link <ol>)
+   (<ol> ^report <r>)
+-->
+   (<ol> ^report <r> -)
+}

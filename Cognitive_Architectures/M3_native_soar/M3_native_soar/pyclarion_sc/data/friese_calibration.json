@@ -1,0 +1,9 @@
+{
+  "attitude_correlation": 0.212,
+  "explicit_slope": 0.655,
+  "explicit_bias": 0.146,
+  "implicit_mean": 0.208,
+  "implicit_sd": 0.533,
+  "explicit_measure_noise": 0.091,
+  "implicit_measure_noise": 0.101
+}

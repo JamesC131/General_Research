@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Core Studio - pyclarion-sc</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/core.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='8' fill='%232a78d6'/%3E%3Crect y='8' width='16' height='8' fill='%23eb6834'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="topbar">
+  <a class="wordmark" href="/core">pyclarion<span>-sc</span></a>
+  <nav class="tabs" aria-label="Main">
+    <a href="/core" aria-current="page">Core Studio</a>
+    <a href="/lab">Simulation Lab</a>
+    <a href="/robot">Robot World</a>
+  </nav>
+  <div class="spacer"></div>
+  <button class="theme-toggle" type="button">Dark mode</button>
+</header>
+
+<div class="layout">
+  <aside class="side" aria-label="Scenario editor">
+    <h2>Scenario</h2>
+    <select id="preset" aria-label="Load a scenario"></select>
+    <p class="hint" id="preset-desc"></p>
+
+    <h2>Drives</h2>
+    <p class="hint">Strength = stimulus level × deficit (Eq. 5). Decline = how fast the deficit falls with time on task (Eq. 6).</p>
+    <table class="mini-table" id="drives"></table>
+    <button class="btn small" id="add-drive" type="button">Add drive</button>
+
+    <h2>Goals</h2>
+    <p class="hint">Relevance links drives to goal strength (Eq. 7). Satisfaction sets the goal's value(g).</p>
+    <div id="goals"></div>
+    <button class="btn small" id="add-goal" type="button">Add goal</button>
+
+    <h2>Metacognition</h2>
+    <div id="mcs"></div>
+
+    <h2>Situation</h2>
+    <p class="hint">Features of the current state that rules can check.</p>
+    <div id="state"></div>
+    <div class="field"><input type="text" id="new-feature" placeholder="new feature name" aria-label="New feature name"><button class="btn small" id="add-feature" type="button">Add</button></div>
+
+    <h2>Actions and implicit preferences</h2>
+    <p class="hint">The bottom level's Q-values: what the implicit network prefers.</p>
+    <table class="mini-table" id="actions"></table>
+    <div class="field"><input type="text" id="new-action" placeholder="new action name" aria-label="New action name"><button class="btn small" id="add-action" type="button">Add</button></div>
+
+    <h2>Explicit rules</h2>
+    <p class="hint">Top level: IF the state matches (and the goal, if set) THEN the action.</p>
+    <div id="rules"></div>
+    <button class="btn small" id="add-rule" type="button">Add rule</button>
+
+    <h2>Run</h2>
+    <div class="field"><label for="steps">Decision cycles</label><input type="number" id="steps" min="1" max="500" value="40"></div>
+    <div class="field"><label for="seed">Random seed</label><input type="number" id="seed" min="0" value="1"></div>
+    <p class="hint">The model updates as you edit. Change the seed to see another random run.</p>
+    <button class="btn" id="export" type="button">Download scenario (JSON)</button>
+    <label class="btn" for="import">Load scenario file</label>
+    <input type="file" id="import" accept="application/json" hidden>
+  </aside>
+
+  <main class="main">
+    <section class="block">
+      <div class="block-head">
+        <div>
+          <h1 id="title">Core Studio</h1>
+          <p class="lede">Follow one Clarion decision cycle at a time: drives set goals, the goal's value sets how explicit
+            processing is, and explicitness decides whether the top-level rules or the bottom-level network acts.</p>
+        </div>
+      </div>
+      <div id="error" class="error" hidden></div>
+      <div class="arch-wrap">
+        <svg id="arch" viewBox="0 0 980 340" role="img" aria-labelledby="arch-title">
+          <title id="arch-title">Clarion architecture at the selected decision cycle</title>
+        </svg>
+      </div>
+      <div class="scrubber">
+        <button class="btn small" id="play" type="button" aria-label="Play through the cycles">Play</button>
+        <label for="t" class="muted">Cycle <b id="t-label" class="num">1</b> of <span id="t-max" class="num">1</span></label>
+        <input type="range" id="t" min="1" max="1" value="1" aria-label="Decision cycle">
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="block-head">
+        <div><h2>Over time</h2><p class="hint">Click a point to inspect that cycle.</p></div>
+        <dl class="kv" id="summary"></dl>
+      </div>
+      <div class="charts">
+        <div>
+          <p class="chart-title">Drive strengths</p>
+          <div class="legend" id="drive-legend"></div>
+          <div class="chart-box"><canvas id="c-drives" aria-label="Drive strengths over time"></canvas></div>
+        </div>
+        <div>
+          <p class="chart-title">Explicitness and the level that acted</p>
+          <div class="legend">
+            <span><i style="background:var(--explicit)"></i>Top level acted</span>
+            <span><i style="background:var(--implicit)"></i>Bottom level acted</span>
+            <span><i class="ring" style="border-color:var(--ink)"></i>Levels disagreed</span>
+          </div>
+          <div class="chart-box"><canvas id="c-expl" aria-label="Explicitness over time"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="block-head"><div><h2 id="inspect-title">Inside cycle 1</h2>
+        <p class="hint">The equations with this cycle's numbers.</p></div></div>
+      <div class="inspect">
+        <div class="equations" id="equations"></div>
+        <div>
+          <p class="chart-title">Utility of each explicitness level, U = level × (α·value − c)</p>
+          <div class="chart-box short"><canvas id="c-util" aria-label="Utilities of explicitness levels"></canvas></div>
+          <p class="chart-title" style="margin-top:14px">Probability of each level (Boltzmann)</p>
+          <div class="chart-box short"><canvas id="c-prob" aria-label="Probabilities of explicitness levels"></canvas></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+<script src="/static/vendor/chart.min.js"></script>
+<script src="/static/common.js"></script>
+<script src="/static/core.js"></script>
+</body>
+</html>

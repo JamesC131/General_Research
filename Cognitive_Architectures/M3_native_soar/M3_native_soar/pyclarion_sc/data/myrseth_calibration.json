@@ -1,0 +1,23 @@
+{
+  "explicit_implicit": {
+    "top_granola_mean": 111.1,
+    "top_granola_sd": 12.2,
+    "top_chocolate_mean": 53.4,
+    "top_chocolate_sd": 39.1,
+    "bottom_granola_mean": 79.4,
+    "bottom_granola_sd": 41.8,
+    "bottom_chocolate_mean": 140.0,
+    "bottom_chocolate_sd": 50.0
+  },
+  "desire_goal": {
+    "top_granola_mean": 108.9,
+    "top_granola_sd": 12.9,
+    "top_chocolate_mean": 51.2,
+    "top_chocolate_sd": 13.3,
+    "bottom_granola_mean": 81.1,
+    "bottom_granola_sd": 23.7,
+    "bottom_chocolate_mean": 118.5,
+    "bottom_chocolate_sd": 45.0,
+    "healthy_goal_shift": 30.5
+  }
+}

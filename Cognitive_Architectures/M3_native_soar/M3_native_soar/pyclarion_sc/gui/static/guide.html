@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Clarion Explorer</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/guide.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='8' fill='%232a78d6'/%3E%3Crect y='8' width='16' height='8' fill='%23eb6834'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="topbar">
+  <a class="wordmark" href="/guide">Clarion<span> Explorer</span></a>
+  <nav class="tabs" aria-label="Main">
+    <a href="/guide" aria-current="page">Start here</a>
+    <a href="/core">Architecture</a>
+    <a href="/robot">Robot</a>
+  </nav>
+  <div class="spacer"></div>
+  <button class="theme-toggle" type="button">Dark mode</button>
+</header>
+
+<div class="guide">
+  <nav class="toc" aria-label="On this page">
+    <p class="toc-title">On this page</p>
+    <ol>
+      <li><a href="#what">What Clarion is</a></li>
+      <li><a href="#parts">The four parts</a></li>
+      <li><a href="#selfcontrol">Self-control in Clarion</a></li>
+      <li><a href="#example">A worked example</a></li>
+      <li><a href="#equations">The equations</a></li>
+      <li><a href="#architecture">Using the Architecture page</a></li>
+      <li><a href="#robot">Using the Robot page</a></li>
+      <li><a href="#glossary">Glossary</a></li>
+      <li><a href="#sources">Sources</a></li>
+    </ol>
+  </nav>
+
+  <article class="doc">
+    <header class="doc-head">
+      <h1>Self-control in Clarion, explained from the start</h1>
+      <p class="lede">This site has two tools. The <a href="/core">Architecture</a> page shows the inside of the model, one
+        decision at a time. The <a href="/robot">Robot</a> page shows the same model driving a cleaning robot. Read this
+        page first; it takes about fifteen minutes.</p>
+    </header>
+
+    <section id="what">
+      <h2>What Clarion is</h2>
+      <p>Clarion is a <em>cognitive architecture</em>: a theory of how the mind works, written precisely enough to run as
+        a computer program. It was developed by Ron Sun. The research in this project uses it to explain
+        self-control in people, and then to give a robot the same kind of self-control.</p>
+      <p>The central idea is that the mind works at two levels at the same time:</p>
+      <div class="levels">
+        <div class="level top">
+          <h3>Top level: explicit</h3>
+          <p>Knowledge you can put into words, like rules: "If granola is available, pick granola." It is slower and
+            takes effort.</p>
+        </div>
+        <div class="level bottom">
+          <h3>Bottom level: implicit</h3>
+          <p>Knowledge you act on without words, like habits and gut preferences: "Chocolate looks good." It is fast and
+            automatic. In the model it is a small neural network.</p>
+        </div>
+      </div>
+      <p>Most of the time the two levels agree. Self-control is about what happens when they don't.</p>
+    </section>
+
+    <section id="parts">
+      <h2>The four parts</h2>
+      <p>Clarion has four subsystems. Each one has a top level and a bottom level. The self-control work uses three of
+        them directly; the fourth (memory) appears in one of the simulations.</p>
+      <figure class="diagram">
+        <svg viewBox="0 0 760 300" role="img" aria-labelledby="dg-title">
+          <title id="dg-title">The Clarion decision cycle: drives, goals and explicitness, action</title>
+          <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>
+          <rect x="10" y="40" width="200" height="190" rx="10" class="box"/>
+          <text x="26" y="68" class="t1">Motivational</text><text x="26" y="88" class="t1">subsystem (MS)</text>
+          <text x="26" y="118" class="t2">Drives: basic needs such as</text><text x="26" y="136" class="t2">food, energy, achievement.</text>
+          <text x="26" y="166" class="t2">Strength =</text><text x="26" y="184" class="t2">stimulus level × deficit</text>
+          <rect x="280" y="40" width="200" height="190" rx="10" class="box"/>
+          <text x="296" y="68" class="t1">Metacognitive</text><text x="296" y="88" class="t1">subsystem (MCS)</text>
+          <text x="296" y="118" class="t2">Picks the goal from the</text><text x="296" y="136" class="t2">strongest drives, and decides</text>
+          <text x="296" y="154" class="t2">how explicit to be:</text><text x="296" y="184" class="t2 strong">explicitness, 0 to 1</text>
+          <rect x="550" y="40" width="200" height="95" rx="10" class="box top"/>
+          <text x="566" y="66" class="t1 c-top">Action-centered (ACS)</text><text x="566" y="86" class="t2">Top: explicit rules</text>
+          <text x="566" y="104" class="t2">"the plan"</text>
+          <rect x="550" y="135" width="200" height="95" rx="10" class="box bottom"/>
+          <text x="566" y="161" class="t2">Bottom: habit network</text><text x="566" y="179" class="t2">"the habit"</text>
+          <text x="566" y="208" class="t2 c-bottom">chosen with 1 − explicitness</text>
+          <text x="566" y="122" class="t2 c-top">chosen with explicitness</text>
+          <path d="M210 135 L276 135" class="arrow"/><path d="M480 135 L546 135" class="arrow"/>
+          <rect x="250" y="252" width="260" height="40" rx="10" class="box faint"/>
+          <text x="380" y="277" text-anchor="middle" class="t2">Non-action-centered (NACS): memory</text>
+          <text x="20" y="22" class="t2 muted">1. needs</text><text x="290" y="22" class="t2 muted">2. goal and effort</text><text x="560" y="22" class="t2 muted">3. action</text>
+        </svg>
+        <figcaption>One decision cycle. The robot repeats this cycle every few steps; a person does it continuously.</figcaption>
+      </figure>
+      <dl class="parts">
+        <dt>Motivational subsystem (MS)</dt>
+        <dd>Holds the <b>drives</b>, the basic needs behind behaviour. A drive gets stronger when the situation is
+          relevant to it (<b>stimulus level</b>) and when the person or robot has a stronger need for it (<b>deficit</b>).
+          Robot example: the energy drive grows as the battery runs down.</dd>
+        <dt>Metacognitive subsystem (MCS)</dt>
+        <dd>The "manager". It turns drives into a <b>goal</b>, and it decides how much effort to put into explicit
+          thinking. That amount is the <b>explicitness level</b>, a number between 0 (all habit) and 1 (all plan).</dd>
+        <dt>Action-centered subsystem (ACS)</dt>
+        <dd>Chooses the action. The top level has <b>rules</b> (the plan). The bottom level has a <b>neural network</b>
+          that scores each action (the habit). Explicitness decides which of the two gets to act.</dd>
+        <dt>Non-action-centered subsystem (NACS)</dt>
+        <dd>Holds knowledge and memory. In one of the human simulations (Schmeichel, 2007) it is a working memory that
+          only works well when the top level is in control.</dd>
+      </dl>
+    </section>
+
+    <section id="selfcontrol">
+      <h2>Self-control in Clarion</h2>
+      <p>In this framework, self-control is <b>a decision about how explicit to be</b>. When the plan and the habit want
+        different things, the one with control wins. The manager (MCS) sets that balance by weighing benefit against
+        cost:</p>
+      <ul class="points">
+        <li><b>Benefit:</b> how much the current goal would satisfy the drives right now. This is <var>value(g)</var>.</li>
+        <li><b>Cost:</b> explicit thinking takes effort. This is the constant <var>c</var>.</li>
+      </ul>
+      <p>If the benefit is bigger than the cost, higher explicitness is more useful, so the plan usually wins. If it is
+        smaller, lower explicitness is more useful, so the habit usually wins. The choice is a little random, as human
+        choices are: the model picks an explicitness level by chance, with better levels being more likely.</p>
+      <p>This one idea explains several human findings:</p>
+      <ul class="points">
+        <li><b>Anticipation</b> (Myrseth et al., 2009): a choice that is still ahead makes the healthy goal feel more
+          important, so control is stronger. After the choice, control relaxes.</li>
+        <li><b>Motivational shift</b> (Schmeichel, 2007): after a long period of control, the drive behind it has been
+          satisfied, its deficit is lower, and control is weaker on the next task.</li>
+        <li><b>Capacity</b> (Friese et al., 2008): when the mind is busy (for example, memorizing eight digits), there
+          is simply less room for explicit thinking, and habits take over.</li>
+      </ul>
+    </section>
+
+    <section id="example">
+      <h2>A worked example</h2>
+      <p>These are the real numbers from the Myrseth simulation in Gomez and Sun (2025). A person is deciding about a
+        snack. The relevant drive is <b>achievement</b> (wanting to eat healthily).</p>
+      <div class="tx"><table class="data steps">
+        <thead><tr><th></th><th>Before choosing</th><th>After choosing</th></tr></thead>
+        <tbody>
+          <tr><td>Stimulus level of achievement</td><td>0.8</td><td>0.5</td></tr>
+          <tr><td>Deficit (personal need)</td><td>0.7</td><td>0.7</td></tr>
+          <tr><td>Drive strength = stimulus × deficit</td><td>0.56</td><td>0.35</td></tr>
+          <tr><td>Satisfaction of the goal "choose snack"</td><td>0.5</td><td>0.5</td></tr>
+          <tr><td>value(g) = strength × satisfaction</td><td>0.28</td><td>0.175</td></tr>
+          <tr><td>Benefit minus cost: α × value − c, with α = 1 and c = 0.185</td><td class="pos">+0.095</td><td class="neg">−0.010</td></tr>
+          <tr><td>Result</td><td class="pos">higher explicitness pays</td><td class="neg">lower explicitness pays</td></tr>
+          <tr><td>Average explicitness the model ends up with</td><td>0.72</td><td>0.47</td></tr>
+        </tbody>
+      </table></div>
+      <p>So before choosing, the plan ("pick the healthy option") is in control about 72% of the time; after choosing,
+        less than half the time. The model then rated granola higher than chocolate before the choice but not after, as
+        people did.</p>
+
+      <div class="tryit" id="tryit">
+        <h3>Try it</h3>
+        <p>Move the stimulus level and watch the benefit and the explicitness change. Deficit 0.7, satisfaction 0.5,
+          α = 1, c = 0.185, temperature 0.7, 21 levels, as in the paper.</p>
+        <div class="field wide"><label for="try-stim">Stimulus level of achievement</label>
+          <input type="range" id="try-stim" min="0" max="1" step="0.05" value="0.8">
+          <output id="try-stim-out" class="num">0.80</output></div>
+        <dl class="kv">
+          <dt>Drive strength</dt><dd id="try-ds" class="num"></dd>
+          <dt>value(g)</dt><dd id="try-v" class="num"></dd>
+          <dt>α × value − c</dt><dd id="try-net" class="num"></dd>
+          <dt>Average explicitness</dt><dd id="try-e" class="num"></dd>
+        </dl>
+        <div class="horizon" aria-hidden="true"><div class="h-top" id="try-top"><span>plan</span></div><div class="h-bottom"><span>habit</span></div></div>
+      </div>
+    </section>
+
+    <section id="equations">
+      <h2>The equations</h2>
+      <p>Numbers refer to Gomez and Sun (2024). You can see each one computed with live numbers on the Architecture page.</p>
+      <div class="tx"><table class="data eq">
+        <thead><tr><th>What</th><th>Equation</th><th>In words</th></tr></thead>
+        <tbody>
+          <tr><td>Drive strength (Eq. 5)</td><td class="f"><var>ds</var> = stimulus level × deficit</td><td>How strongly a need is active right now.</td></tr>
+          <tr><td>Deficit decline (Eq. 6)</td><td class="f">deficit(t) = deficit(0) − <var>k</var> × time on task</td><td>Satisfying a need for a long time makes it weaker.</td></tr>
+          <tr><td>Goal strength (Eq. 7)</td><td class="f"><var>gs</var> = Σ relevance × <var>ds</var></td><td>A goal is strong when the drives behind it are strong.</td></tr>
+          <tr><td>Value of the goal (Eq. 3)</td><td class="f">value(<var>g</var>) = Σ <var>ds</var> × satisfaction</td><td>How much reaching the goal would satisfy current needs.</td></tr>
+          <tr><td>Utility of explicitness (Eq. 2)</td><td class="f"><var>U</var> = level × (α × value(<var>g</var>) − <var>c</var>)</td><td>Benefit of explicit thinking minus its cost, for each level.</td></tr>
+          <tr><td>Choice (Eq. 4)</td><td class="f"><var>p</var>(level) ∝ e<sup><var>U</var>/τ</sup></td><td>Better options are more likely, but not certain. The temperature τ sets how random.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="architecture">
+      <h2>Using the Architecture page</h2>
+      <p>The <a href="/core">Architecture</a> page runs the decision cycle on its own, without a robot, so you can see
+        every number. On the left you edit a scenario; on the right you see what the model does.</p>
+      <ul class="points">
+        <li><b>The diagram</b> follows one cycle from left to right: the situation, the drives, the goal and explicitness,
+          and the action. The blue band (plan) and orange band (habit) show how control is split; the dark line between
+          them moves as explicitness changes.</li>
+        <li><b>The slider</b> under the diagram steps through the cycles. Play runs them in order.</li>
+        <li><b>Over time</b> shows drive strengths and explicitness for every cycle. A dot with a dark ring means the plan
+          and the habit wanted different actions: a self-control conflict.</li>
+        <li><b>Inside cycle</b> shows the equations with that cycle's numbers.</li>
+      </ul>
+      <h3>Three things to try</h3>
+      <ol class="exercises">
+        <li>Load "Myrseth et al. (2009): before choice", then "Myrseth et al. (2009): after choice". Compare the expected explicitness in the diagram (0.72
+          versus 0.47). Which numbers changed, and why?</li>
+        <li>Load "Schmeichel (2007): attention control over time" and press Play. The achievement deficit falls each cycle
+          (Eq. 6). Watch what happens to explicitness and to the share of orange dots.</li>
+        <li>In any scenario, raise the cost <var>c</var> under Metacognition to 0.3. Predict what will happen before you
+          look.</li>
+      </ol>
+    </section>
+
+    <section id="robot">
+      <h2>Using the Robot page</h2>
+      <p>The <a href="/robot">Robot</a> page puts the same cycle inside a cleaning robot. The robot must clean rooms A and
+        B and return to its dock. Room C is very dirty but not its job: that is the temptation. The plan says "go to the
+        next assigned room"; the habit network says "go where the dirt is".</p>
+      <ul class="points">
+        <li><b>The map</b> is the main view. The trail is blue where the plan chose the path and orange where the habit
+          did.</li>
+        <li><b>The right panel</b> shows the robot's drives, its goal, the plan/habit split and its last decision.</li>
+        <li><b>The icons</b> at the top open the rest: scenario and robot choice, an explanation of the scenario, charts,
+          the robot's rules, and a comparison that asks whether self-control is useful for a robot.</li>
+      </ul>
+      <p>There are three scenarios, one for each finding above, and three robots: the Clarion robot, a robot that always
+        follows the plan, and a robot that always follows the habit. The two comparison robots show what self-control
+        adds.</p>
+      <h3>Three things to try</h3>
+      <ol class="exercises">
+        <li>In "Anticipation", pause just before the robot reaches room C's door and just after it. Compare the
+          achievement drive and the plan/habit split.</li>
+        <li>Watch the same seed with the habit-only robot, then the plan-only robot. How long does each take? What does
+          each do at room C?</li>
+        <li>In "Motivational shift", compare the two conditions. Where does the difference in the robot's behaviour
+          appear, in room A or later?</li>
+      </ol>
+    </section>
+
+    <section id="glossary">
+      <h2>Glossary</h2>
+      <dl class="glossary">
+        <dt>Drive</dt><dd>A basic need that motivates behaviour, such as energy or achievement.</dd>
+        <dt>Stimulus level</dt><dd>How relevant the current situation is to a drive (0 to 1).</dd>
+        <dt>Deficit</dt><dd>How strong the underlying need is for this person or robot (its "predisposition").</dd>
+        <dt>Goal</dt><dd>What the agent is trying to do right now, chosen from the drives.</dd>
+        <dt>value(g)</dt><dd>How much reaching the goal would satisfy the current drives.</dd>
+        <dt>Explicitness</dt><dd>The share of control given to the top level (the plan). 0 = all habit, 1 = all plan.</dd>
+        <dt>Top level</dt><dd>Explicit knowledge: rules that can be stated in words.</dd>
+        <dt>Bottom level</dt><dd>Implicit knowledge: a neural network that scores actions (Q-values) from experience.</dd>
+        <dt>Q-value</dt><dd>The bottom level's score for how good an action seems right now.</dd>
+        <dt>Boltzmann choice</dt><dd>Choosing by chance, where better options are more likely. Its temperature sets how
+          random the choice is: low temperature, nearly always the best option.</dd>
+        <dt>Conflict</dt><dd>A cycle in which the plan and the habit propose different actions.</dd>
+        <dt>Safety reflex</dt><dd>In the robot, a fixed rule outside self-control: below 8% battery, go to the dock.</dd>
+        <dt>Seed</dt><dd>A number that fixes the random choices, so a run can be repeated exactly.</dd>
+      </dl>
+    </section>
+
+    <section id="sources">
+      <h2>Sources</h2>
+      <ul class="refs">
+        <li>Gomez, A. A., &amp; Sun, R. (2024). A "rational" framework for self-control. <i>Proceedings of the 46th Annual
+          Conference of the Cognitive Science Society</i>, 3334-3341.</li>
+        <li>Gomez, A., &amp; Sun, R. (2025). Self-control in context: A cognitive architectural approach.</li>
+        <li>Sun, R. (2016). <i>Anatomy of the mind: Exploring psychological mechanisms and processes with the Clarion
+          cognitive architecture</i>. Oxford University Press.</li>
+        <li>Sun, R., Bugrov, S., &amp; Dai, D. (2022). A unified framework for interpreting a range of
+          motivation-performance phenomena. <i>Cognitive Systems Research, 71</i>, 24-40.</li>
+      </ul>
+      <p class="hint">The robot scenarios are demonstrations built on these papers. They are not results from the papers.</p>
+    </section>
+  </article>
+</div>
+<script src="/static/common.js"></script>
+<script src="/static/core-engine.js"></script>
+<script src="/static/guide.js"></script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+.arch-wrap { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 12px 8px; margin-top: 18px; }
+#arch { width: 100%; height: auto; display: block; }
+#arch text { font-family: var(--sans); fill: var(--ink); }
+#arch .label { font-size: 13px; font-weight: 600; }
+#arch .sub { font-size: 11.5px; fill: var(--ink-2); }
+#arch .serif { font-family: var(--serif); }
+#arch .box { fill: var(--surface); stroke: var(--rule-strong); stroke-width: 1; }
+#arch .arrow { stroke: var(--ink-3); stroke-width: 1.4; fill: none; marker-end: url(#arrowhead); }
+#arch .top-band { fill: var(--explicit-soft); }
+#arch .bottom-band { fill: var(--implicit-soft); }
+#arch .horizon { stroke: var(--ink); stroke-width: 2; }
+#arch .acting { stroke-width: 2.5; }
+#arch .dim { opacity: 0.45; }
+
+.scrubber { display: flex; align-items: center; gap: 14px; margin-top: 12px; }
+.scrubber input[type="range"] { flex: 1; }
+
+.inspect { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 32px; }
+@media (max-width: 1100px) { .inspect { grid-template-columns: 1fr; } }
+.equations { font-family: var(--serif); font-size: 15px; line-height: 1.55; }
+.equations h3 { font-family: var(--sans); margin: 16px 0 4px; }
+.equations h3:first-child { margin-top: 0; }
+.equations .eq { margin: 2px 0; }
+.equations .eq var { font-style: italic; }
+.equations .res { font-weight: 600; font-variant-numeric: tabular-nums; }
+.equations .explicit { color: var(--explicit); }
+.equations .implicit { color: var(--implicit); }
+
+.goal-card { border-top: 1px solid var(--rule); padding: 10px 0 6px; }
+.goal-card:first-child { border-top: 0; }
+.row { display: flex; gap: 6px; align-items: center; }
+.row > input[type="text"] { flex: 1; }
+.rule-card { border: 1px solid var(--rule); border-radius: var(--radius); padding: 8px 10px; margin: 8px 0; }
+.rule-card .conds { display: flex; flex-wrap: wrap; gap: 6px 10px; margin: 6px 0; font-size: 12.5px; color: var(--ink-2); }
+.rule-card .conds select { width: auto; padding: 1px 4px; font-size: 12.5px; }
+.rule-text { font: 400 13px/1.4 var(--serif); color: var(--ink-2); margin: 4px 0 0; }
+.feature { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+.feature label { flex: 1; }
+.side .btn { margin: 6px 6px 0 0; }
+
+#drives td:first-child input { min-width: 92px; }
+#drives input[type="number"] { width: 62px; }

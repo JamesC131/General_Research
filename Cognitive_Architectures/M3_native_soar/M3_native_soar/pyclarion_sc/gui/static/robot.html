@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Clarion Robot World</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/robot.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='8' fill='%232a78d6'/%3E%3Crect y='8' width='16' height='8' fill='%23eb6834'/%3E%3C/svg%3E">
+</head>
+<body class="rw">
+<header class="rw-bar">
+  <span class="wordmark">Clarion<span class="wm-long"> Robot World</span></span>
+  <span class="rw-now" id="now"></span>
+  <nav class="rw-icons" aria-label="Panels">
+    <button class="icon" type="button" data-drawer="settings" aria-label="Scenario and robot" title="Scenario and robot">
+      <svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
+    <button class="icon" type="button" data-drawer="about" aria-label="About this scenario" title="About this scenario">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg></button>
+    <button class="icon" type="button" data-drawer="charts" aria-label="Charts over the episode" title="Charts over the episode">
+      <svg viewBox="0 0 24 24"><path d="M4 4v16h16"/><path d="M7 15l4-5 3 3 5-6"/></svg></button>
+    <button class="icon" type="button" data-drawer="plan" aria-label="The robot's plan and habit" title="The robot's plan and habit">
+      <svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="5" cy="6" r="1"/><circle cx="5" cy="12" r="1"/><circle cx="5" cy="18" r="1"/></svg></button>
+    <button class="icon" type="button" data-drawer="useful" aria-label="Is self-control useful for a robot?" title="Is self-control useful for a robot?">
+      <svg viewBox="0 0 24 24"><path d="M12 4v16M7 20h10M5 7h14"/><path d="M5 7l-3 6h6zM19 7l-3 6h6z"/></svg></button>
+    <button class="icon theme-toggle" type="button" aria-label="Switch light or dark mode" title="Switch light or dark mode">
+      <svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button>
+  </nav>
+</header>
+
+<main class="rw-main">
+  <section class="rw-stage" aria-label="Simulation">
+    <div class="rw-canvas-wrap" id="canvas-wrap">
+      <canvas id="world" aria-label="Grid world with the cleaning robot"></canvas>
+    </div>
+    <div class="rw-play">
+      <button class="icon" id="play" type="button" aria-label="Play" title="Play (space)">
+        <svg viewBox="0 0 24 24" class="i-play"><path d="M8 5v14l11-7z"/></svg>
+        <svg viewBox="0 0 24 24" class="i-pause"><path d="M8 5v14M16 5v14"/></svg></button>
+      <button class="icon" id="restart" type="button" aria-label="Restart" title="Restart">
+        <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v5h5"/></svg></button>
+      <input type="range" id="scrub" min="0" max="0" value="0" aria-label="Time step">
+      <span class="num muted" id="clock">step 0</span>
+      <select id="speed" aria-label="Playback speed"><option value="4">Slow</option><option value="10" selected>Normal</option><option value="25">Fast</option></select>
+    </div>
+    <div class="error rw-error" id="error" hidden></div>
+  </section>
+
+  <aside class="rw-panel" aria-label="Live data" aria-live="polite">
+    <p class="rw-phase" id="phase">Loading</p>
+    <p class="hint" id="robot-name"></p>
+
+    <h3>Drives</h3>
+    <div id="drives"></div>
+
+    <h3>Goal and explicitness</h3>
+    <dl class="kv">
+      <dt>Goal</dt><dd id="goal">–</dd>
+      <dt>value(g)</dt><dd id="value" class="num">–</dd>
+      <dt>α·value − c</dt><dd id="net" class="num">–</dd>
+    </dl>
+    <div class="horizon" title="Share of control given to the plan (top) and to the habit (bottom)">
+      <div class="h-top" id="h-top"><span>plan</span></div>
+      <div class="h-bottom"><span>habit</span></div>
+    </div>
+    <p class="hint" id="expl-text">–</p>
+
+    <h3>Last decision</h3>
+    <div class="decision" id="decision"><p class="hint">The robot decides every 3 steps.</p></div>
+
+    <h3>Battery</h3>
+    <div class="battery"><div id="battery-bar"></div></div>
+    <p class="hint num" id="battery-text">–</p>
+
+    <h3>So far</h3>
+    <dl class="kv" id="tally"></dl>
+  </aside>
+</main>
+
+<div class="backdrop" id="backdrop" hidden></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title" hidden>
+  <div class="drawer-head">
+    <h2 id="drawer-title"></h2>
+    <button class="icon" id="drawer-close" type="button" aria-label="Close" title="Close (Esc)">
+      <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+
+  <div class="drawer-body" data-panel="settings">
+    <h3>Scenario</h3>
+    <div id="scenario-list" role="radiogroup" aria-label="Scenario"></div>
+    <h3>Condition</h3>
+    <div id="condition-list" role="radiogroup" aria-label="Condition"></div>
+    <h3>Robot</h3>
+    <div id="controller-list" role="radiogroup" aria-label="Robot"></div>
+    <h3>Random seed</h3>
+    <div class="field"><label for="seed">Seed</label><span id="seed-slot"></span></div>
+    <p class="hint" id="seed-hint">The seed sets where the dirt is and every random choice. Same seed, same world: compare robots fairly.</p>
+    <div id="app-links" hidden><h3>Other tools</h3><p><a href="/core">Core Studio</a> &nbsp; <a href="/lab">Simulation Lab</a></p></div>
+  </div>
+
+  <div class="drawer-body" data-panel="about">
+    <p class="muted" id="paper"></p>
+    <p class="drawer-lede" id="story"></p>
+    <h3>What you see</h3>
+    <ul class="plain">
+      <li><i class="dot" style="background:var(--explicit)"></i>Trail where the plan (top level, explicit rules) chose the path.</li>
+      <li><i class="dot" style="background:var(--implicit)"></i>Trail where the habit (bottom level, trained network) chose the path.</li>
+      <li><i class="dot" style="background:var(--dirt)"></i>Dirt. Rooms A and B are assigned; room C is not, and it is very dirty.</li>
+      <li><i class="dot" style="background:var(--good)"></i>The charging dock, where the robot starts and must return.</li>
+    </ul>
+    <h3>How the robot decides, every 3 steps</h3>
+    <ol class="plain-ol">
+      <li>Motivational subsystem: each drive's strength is stimulus × deficit (Eq. 5). The achievement deficit can fall with time on task (Eq. 6).</li>
+      <li>Metacognitive subsystem: the strongest goal is chosen (Eq. 7) and kept until done or clearly overridden.</li>
+      <li>The goal's value sets the utility of each explicitness level, U = level × (α·value(g) − c), and a level is drawn from a Boltzmann distribution.</li>
+      <li>Action-centered subsystem: with probability equal to explicitness the plan acts; otherwise the habit acts.</li>
+      <li>A safety reflex (battery below 8%) sends the robot to the dock, outside self-control.</li>
+    </ol>
+  </div>
+
+  <div class="drawer-body" data-panel="charts">
+    <p class="hint">Each point is one decision. Shaded bands are task phases. Click a chart to jump there.</p>
+    <p class="chart-title">Explicitness and the level that acted</p>
+    <div class="legend"><span><i style="background:var(--explicit)"></i>Plan acted</span>
+      <span><i style="background:var(--implicit)"></i>Habit acted</span>
+      <span><i class="ring" style="border-color:var(--ink)"></i>They disagreed</span></div>
+    <div class="chart-box"><canvas id="c-expl"></canvas></div>
+    <p class="chart-title" style="margin-top:18px">Drive strengths</p>
+    <div class="legend"><span><i style="background:var(--drive-1)"></i>Achievement</span><span><i style="background:var(--drive-2)"></i>Energy</span></div>
+    <div class="chart-box short"><canvas id="c-drives"></canvas></div>
+    <h3 style="margin-top:20px">By phase</h3>
+    <div class="table-scroll"><table class="data" id="phases"></table></div>
+  </div>
+
+  <div class="drawer-body" data-panel="plan">
+    <h3>Top level: the explicit plan</h3>
+    <ol class="rules" id="rules"></ol>
+    <h3>Bottom level: the habit</h3>
+    <p>A small neural network (6 inputs, two hidden layers of 16, 5 outputs) gives a Q-value to each behaviour. It was trained on synthetic experience of a greedy robot that goes wherever the most dirt is right now, ignores quiet zones, and docks only when the battery is low.</p>
+    <h3>Behaviours</h3>
+    <ul class="plain" id="options"></ul>
+  </div>
+
+  <div class="drawer-body" data-panel="useful" id="useful"></div>
+</aside>
+
+<script src="/static/vendor/chart.min.js"></script>
+<script src="/static/common.js"></script>
+<script src="/static/robot.js"></script>
+</body>
+</html>

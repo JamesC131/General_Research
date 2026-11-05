@@ -1,0 +1,452 @@
+# Soar-RL habit values learned by train_habit() (reward = dirt cleaned, no deliberation)
+sp {rl*rl*habit*41
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name dock)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level low ^temptation-dist far ^quiet-zone false
+          ^temptation-level none ^assigned-done true
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 1.010577)
+}
+
+sp {rl*rl*habit*40
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name clean_full)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level low ^temptation-dist far ^quiet-zone false
+          ^temptation-level none ^assigned-done false
+          ^in-assigned-with-dirt true)
+    -->
+    (<s1> ^operator <o1> = 2.159010)
+}
+
+sp {rl*rl*habit*39
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name clean_quiet)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level low ^temptation-dist far ^quiet-zone false
+          ^temptation-level none ^assigned-done false
+          ^in-assigned-with-dirt true)
+    -->
+    (<s1> ^operator <o1> = 1.809131)
+}
+
+sp {rl*rl*habit*38
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name dock)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level low ^temptation-dist far ^quiet-zone false
+          ^temptation-level none ^assigned-done false
+          ^in-assigned-with-dirt true)
+    -->
+    (<s1> ^operator <o1> = 0.261669)
+}
+
+sp {rl*rl*habit*37
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name clean_full)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level mid ^temptation-dist far ^quiet-zone false
+          ^temptation-level none ^assigned-done false
+          ^in-assigned-with-dirt true)
+    -->
+    (<s1> ^operator <o1> = 2.349987)
+}
+
+sp {rl*rl*habit*36
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name clean_quiet)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level mid ^temptation-dist far ^quiet-zone false
+          ^temptation-level none ^assigned-done false
+          ^in-assigned-with-dirt true)
+    -->
+    (<s1> ^operator <o1> = 2.082085)
+}
+
+sp {rl*rl*habit*35
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name dock)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level mid ^temptation-dist far ^quiet-zone false
+          ^temptation-level none ^assigned-done false
+          ^in-assigned-with-dirt true)
+    -->
+    (<s1> ^operator <o1> = 1.029031)
+}
+
+sp {rl*rl*habit*34
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name dock)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level mid ^temptation-dist far ^quiet-zone false
+          ^temptation-level none ^assigned-done true
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 0.682235)
+}
+
+sp {rl*rl*habit*33
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name dock)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level high ^temptation-dist far ^quiet-zone false
+          ^temptation-level none ^assigned-done true
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 0.373214)
+}
+
+sp {rl*rl*habit*32
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name next_room)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level high ^temptation-dist far ^quiet-zone true
+          ^temptation-level none ^assigned-done false
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 1.635939)
+}
+
+sp {rl*rl*habit*31
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name dock)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level high ^temptation-dist far ^quiet-zone true
+          ^temptation-level none ^assigned-done false
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 1.429999)
+}
+
+sp {rl*rl*habit*30
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name clean_full)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level high ^temptation-dist far ^quiet-zone true
+          ^temptation-level none ^assigned-done false
+          ^in-assigned-with-dirt true)
+    -->
+    (<s1> ^operator <o1> = 2.897254)
+}
+
+sp {rl*rl*habit*29
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name clean_quiet)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level high ^temptation-dist far ^quiet-zone true
+          ^temptation-level none ^assigned-done false
+          ^in-assigned-with-dirt true)
+    -->
+    (<s1> ^operator <o1> = 0.170929)
+}
+
+sp {rl*rl*habit*28
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name dock)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level high ^temptation-dist far ^quiet-zone true
+          ^temptation-level none ^assigned-done false
+          ^in-assigned-with-dirt true)
+    -->
+    (<s1> ^operator <o1> = 0.001180)
+}
+
+sp {rl*rl*habit*27
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name next_room)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level mid ^temptation-dist far ^quiet-zone false
+          ^temptation-level none ^assigned-done false
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 0.835766)
+}
+
+sp {rl*rl*habit*26
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name dock)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level mid ^temptation-dist far ^quiet-zone false
+          ^temptation-level none ^assigned-done false
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 0.315913)
+}
+
+sp {rl*rl*habit*25
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name next_room)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level low ^temptation-dist far ^quiet-zone false
+          ^temptation-level none ^assigned-done false
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 0.473575)
+}
+
+sp {rl*rl*habit*24
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name dock)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level low ^temptation-dist far ^quiet-zone false
+          ^temptation-level none ^assigned-done false
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 0.193324)
+}
+
+sp {rl*rl*habit*23
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name detour)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level low ^temptation-dist far ^quiet-zone false
+          ^temptation-level high ^assigned-done false
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 0.010973)
+}
+
+sp {rl*rl*habit*22
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name next_room)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level low ^temptation-dist far ^quiet-zone false
+          ^temptation-level high ^assigned-done false
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 0.000494)
+}
+
+sp {rl*rl*habit*21
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name dock)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level low ^temptation-dist far ^quiet-zone false
+          ^temptation-level high ^assigned-done false
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 0.000000)
+}
+
+sp {rl*rl*habit*20
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name detour)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level low ^temptation-dist near ^quiet-zone false
+          ^temptation-level high ^assigned-done false
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 0.131243)
+}
+
+sp {rl*rl*habit*19
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name next_room)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level low ^temptation-dist near ^quiet-zone false
+          ^temptation-level high ^assigned-done false
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 0.000000)
+}
+
+sp {rl*rl*habit*18
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name dock)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level low ^temptation-dist near ^quiet-zone false
+          ^temptation-level high ^assigned-done false
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 0.004938)
+}
+
+sp {rl*rl*habit*17
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name detour)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level mid ^temptation-dist near ^quiet-zone false
+          ^temptation-level high ^assigned-done false
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 2.991947)
+}
+
+sp {rl*rl*habit*16
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name next_room)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level mid ^temptation-dist near ^quiet-zone false
+          ^temptation-level high ^assigned-done false
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 0.125358)
+}
+
+sp {rl*rl*habit*15
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name dock)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level mid ^temptation-dist near ^quiet-zone false
+          ^temptation-level high ^assigned-done false
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 0.059712)
+}
+
+sp {rl*rl*habit*14
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name detour)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level mid ^temptation-dist far ^quiet-zone false
+          ^temptation-level high ^assigned-done false
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 2.975580)
+}
+
+sp {rl*rl*habit*13
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name next_room)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level mid ^temptation-dist far ^quiet-zone false
+          ^temptation-level high ^assigned-done false
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 0.013966)
+}
+
+sp {rl*rl*habit*12
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name dock)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level mid ^temptation-dist far ^quiet-zone false
+          ^temptation-level high ^assigned-done false
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 0.492432)
+}
+
+sp {rl*rl*habit*11
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name detour)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level high ^temptation-dist near ^quiet-zone false
+          ^temptation-level high ^assigned-done false
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 5.625619)
+}
+
+sp {rl*rl*habit*10
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name next_room)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level high ^temptation-dist near ^quiet-zone false
+          ^temptation-level high ^assigned-done false
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 0.380258)
+}
+
+sp {rl*rl*habit*9
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name dock)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level high ^temptation-dist near ^quiet-zone false
+          ^temptation-level high ^assigned-done false
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 0.009817)
+}
+
+sp {rl*rl*habit*8
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name detour)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level high ^temptation-dist far ^quiet-zone false
+          ^temptation-level high ^assigned-done false
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 5.792571)
+}
+
+sp {rl*rl*habit*7
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name next_room)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level high ^temptation-dist far ^quiet-zone false
+          ^temptation-level high ^assigned-done false
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 0.114969)
+}
+
+sp {rl*rl*habit*6
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name dock)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level high ^temptation-dist far ^quiet-zone false
+          ^temptation-level high ^assigned-done false
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 0.000218)
+}
+
+sp {rl*rl*habit*5
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name clean_full)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level high ^temptation-dist far ^quiet-zone false
+          ^temptation-level none ^assigned-done false
+          ^in-assigned-with-dirt true)
+    -->
+    (<s1> ^operator <o1> = 3.288658)
+}
+
+sp {rl*rl*habit*4
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name clean_quiet)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level high ^temptation-dist far ^quiet-zone false
+          ^temptation-level none ^assigned-done false
+          ^in-assigned-with-dirt true)
+    -->
+    (<s1> ^operator <o1> = 0.391353)
+}
+
+sp {rl*rl*habit*3
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name dock)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level high ^temptation-dist far ^quiet-zone false
+          ^temptation-level none ^assigned-done false
+          ^in-assigned-with-dirt true)
+    -->
+    (<s1> ^operator <o1> = 0.091083)
+}
+
+sp {rl*rl*habit*2
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name next_room)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level high ^temptation-dist far ^quiet-zone false
+          ^temptation-level none ^assigned-done false
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 2.936230)
+}
+
+sp {rl*rl*habit*1
+    (state <s1> ^stage behave ^operator <o1> + ^io <i1>)
+    (<o1> ^behaviour true ^name dock)
+    (<i1> ^input-link <i2>)
+    (<i2> ^battery-level high ^temptation-dist far ^quiet-zone false
+          ^temptation-level none ^assigned-done false
+          ^in-assigned-with-dirt false)
+    -->
+    (<s1> ^operator <o1> = 0.881247)
+}
+
