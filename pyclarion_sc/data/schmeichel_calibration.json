@@ -1,0 +1,7 @@
+{
+  "deficit_sd": 0.25,
+  "time_on_task": 0.7,
+  "lstm_temperature": 1.5,
+  "implicit_gain_test1": 0.2,
+  "implicit_gain_test2": 0.4
+}

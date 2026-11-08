@@ -1,0 +1,69 @@
+.guide { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 48px; max-width: 1180px; margin: 0 auto;
+  padding-block: 36px 80px; padding-left: max(32px, env(safe-area-inset-left, 0px)); padding-right: max(32px, env(safe-area-inset-right, 0px)); }
+.toc { position: sticky; top: 84px; align-self: start; font-size: 13.5px; }
+.toc-title { color: var(--ink-3); margin: 0 0 8px; }
+.toc ol { list-style: none; padding: 0; margin: 0; border-left: 2px solid var(--rule); }
+.toc a { display: block; padding: 5px 0 5px 14px; color: var(--ink-2); text-decoration: none; }
+.toc a:hover { color: var(--ink); }
+.doc { max-width: 72ch; min-width: 0; }
+.doc-head { margin-bottom: 8px; }
+.doc h1 { font-size: 34px; max-width: 22ch; text-wrap: balance; }
+.doc h2 { font-size: 24px; margin: 0 0 12px; text-wrap: balance; }
+.doc h3 { font-size: 15px; margin: 22px 0 8px; }
+.doc section { padding: 34px 0 6px; border-top: 1px solid var(--rule); margin-top: 30px; scroll-margin-top: 70px; }
+.doc p, .doc li, .doc dd { font: 400 16.5px/1.65 var(--serif); color: var(--ink); }
+.doc p { margin: 0 0 14px; }
+.doc var { font-style: italic; }
+.levels { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 18px 0; }
+.level { border-radius: 8px; padding: 14px 16px; }
+.level h3 { margin: 0 0 6px; }
+.level p { margin: 0; font-size: 15px; }
+.level.top { background: var(--explicit-soft); }
+.level.top h3 { color: var(--explicit); }
+.level.bottom { background: var(--implicit-soft); }
+.level.bottom h3 { color: var(--implicit); }
+.diagram { margin: 22px 0 18px; }
+.diagram svg { width: 100%; height: auto; display: block; }
+.diagram figcaption { color: var(--ink-3); font-size: 13px; margin-top: 6px; }
+.diagram .box { fill: var(--surface); stroke: var(--rule-strong); stroke-width: 1.2; }
+.diagram .box.top { fill: var(--explicit-soft); stroke: var(--explicit); }
+.diagram .box.bottom { fill: var(--implicit-soft); stroke: var(--implicit); }
+.diagram .box.faint { fill: var(--sunken); stroke: var(--rule); }
+.diagram .t1 { font: 600 15px var(--sans); fill: var(--ink); }
+.diagram .t2 { font: 400 13px var(--sans); fill: var(--ink-2); }
+.diagram .strong { font-weight: 600; fill: var(--ink); }
+.diagram .muted { fill: var(--ink-3); }
+.diagram .c-top { fill: var(--explicit); }
+.diagram .c-bottom { fill: var(--implicit); }
+.diagram .arrow { stroke: var(--ink-3); stroke-width: 1.6; fill: none; marker-end: url(#ah); }
+.diagram .ah { fill: var(--ink-3); }
+dl.parts dt, dl.glossary dt { font: 600 15px/1.4 var(--sans); margin-top: 16px; }
+dl.parts dd, dl.glossary dd { margin: 4px 0 0; }
+dl.glossary dd { font-size: 15.5px; }
+ul.points, ol.exercises { padding-left: 22px; }
+ul.points li, ol.exercises li { margin: 8px 0; }
+table.steps td:not(:first-child), table.steps th:not(:first-child) { text-align: right; white-space: nowrap; }
+table.steps td.pos { color: var(--explicit); font-weight: 600; }
+table.steps td.neg { color: var(--implicit); font-weight: 600; }
+table.eq td { vertical-align: top; }
+table.eq td.f { font-family: var(--serif); white-space: nowrap; }
+.tx { overflow-x: auto; margin: 6px 0 16px; }
+.tx table.data { min-width: 460px; }
+.tryit { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 18px 20px; margin: 22px 0; }
+.tryit h3 { margin-top: 0; }
+.tryit p { font-size: 15px; }
+.field.wide { grid-template-columns: 1fr 1.4fr 48px; }
+.horizon { height: 54px; border-radius: 6px; overflow: hidden; display: flex; flex-direction: column; margin-top: 14px; border: 1px solid var(--rule); }
+.horizon > div { display: flex; align-items: center; padding: 0 10px; font-size: 12px; min-height: 0; overflow: hidden; }
+.h-top { background: var(--explicit-soft); color: var(--explicit); border-bottom: 2px solid var(--ink); transition: flex-basis 0.2s; flex: 0 0 50%; }
+.h-bottom { background: var(--implicit-soft); color: var(--implicit); flex: 1; }
+.refs li { font-size: 15px; margin: 8px 0; }
+@media (max-width: 900px) {
+  .guide { grid-template-columns: 1fr; gap: 0; padding: 20px max(16px, env(safe-area-inset-left, 0px)) 60px; }
+  .toc { position: static; margin-bottom: 8px; }
+  .levels { grid-template-columns: 1fr; }
+  .doc h1 { font-size: 28px; }
+  .field.wide { grid-template-columns: 1fr 52px; }
+  .field.wide input[type="range"] { grid-column: 1 / -1; grid-row: 2; }
+}
+@media (prefers-reduced-motion: reduce) { .h-top { transition: none; } }
