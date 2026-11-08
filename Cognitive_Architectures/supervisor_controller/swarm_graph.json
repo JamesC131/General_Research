@@ -1,0 +1,45 @@
+{
+  "robots": {
+    "robot_5": {
+      "position": [
+        0.0,
+        0.0
+      ],
+      "heading": 0.0,
+      "battery": 94.29999999999708,
+      "action": "idle",
+      "target": null
+    },
+    "robot_4": {
+      "position": [
+        0.0,
+        0.0
+      ],
+      "heading": 0.0,
+      "battery": 94.29999999999708,
+      "action": "idle",
+      "target": null
+    },
+    "robot_3": {
+      "position": [
+        0.0,
+        0.0
+      ],
+      "heading": 0.0,
+      "battery": 94.29999999999708,
+      "action": "idle",
+      "target": null
+    },
+    "robot_2": {
+      "position": [
+        0.0,
+        0.0
+      ],
+      "heading": 0.0,
+      "battery": 94.29999999999708,
+      "action": "idle",
+      "target": null
+    }
+  },
+  "timestamp": 18.272000000000002
+}

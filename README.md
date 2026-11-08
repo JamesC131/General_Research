@@ -27,3 +27,5 @@ CLARION's A1/A2 do not apply (M3 has no drives and no cost term).
 | `native_soar/native_cleaner.py` | bridge: discretized perception, reward, time budget, habit training |
 | `native_soar/variants.py` | the model and its variants |
 | `train_habit.py` | re-train or inspect the habit (keep a copy of habit_rl.soar first) |
+# General_Research
+This is the repository where all my current work is posted.

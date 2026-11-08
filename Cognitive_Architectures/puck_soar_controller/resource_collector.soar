@@ -1,0 +1,107 @@
+############################################
+# PROPOSALS
+############################################
+
+sp {propose*recharge
+   (state <s> ^io.input-link <il>)
+   (<il> ^battery low)
+-->
+   (<s> ^operator <o> +)
+   (<o> ^name recharge)
+}
+
+sp {propose*return-to-nest
+   (state <s> ^io.input-link <il>)
+   (<il> ^carrying-resource true)
+-->
+   (<s> ^operator <o> +)
+   (<o> ^name return-to-nest)
+}
+
+sp {propose*collect
+   (state <s> ^io.input-link <il>)
+   (<il> ^resource-visible true)
+   (<il> ^carrying-resource false)
+   (<il> ^battery ok)
+-->
+   (<s> ^operator <o> +)
+   (<o> ^name collect)
+}
+
+sp {propose*search
+   (state <s> ^io.input-link <il>)
+   (<il> ^resource-visible false)
+   (<il> ^carrying-resource false)
+   (<il> ^battery ok)
+-->
+   (<s> ^operator <o> +)
+   (<o> ^name search)
+}
+
+############################################
+# PREFERENCES
+############################################
+
+sp {pref*return
+   (state <s> ^operator <o>)
+   (<o> ^name return-to-nest)
+-->
+   (<s> ^operator <o> >)
+}
+
+sp {pref*recharge
+   (state <s> ^operator <o>)
+   (<o> ^name recharge)
+-->
+   (<s> ^operator <o> >)
+}
+
+sp {pref*collect
+   (state <s> ^operator <o>)
+   (<o> ^name collect)
+-->
+   (<s> ^operator <o> >)
+}
+
+sp {pref*search
+   (state <s> ^operator <o>)
+   (<o> ^name search)
+-->
+   (<s> ^operator <o> =)
+}
+
+############################################
+# OUTPUT
+############################################
+
+sp {apply*search
+   (state <s> ^operator <o>
+              ^io.output-link <ol>)
+   (<o> ^name search)
+-->
+   (<ol> ^action wander)
+}
+
+sp {apply*collect
+   (state <s> ^operator <o>
+              ^io.output-link <ol>)
+   (<o> ^name collect)
+-->
+   (<ol> ^action move-to-resource)
+}
+
+sp {apply*return
+   (state <s> ^operator <o>
+              ^io.output-link <ol>)
+   (<o> ^name return-to-nest)
+-->
+   (<ol> ^action move-to-nest)
+}
+
+sp {apply*recharge
+   (state <s> ^operator <o>
+              ^io.output-link <ol>)
+   (<o> ^name recharge)
+-->
+   (<ol> ^action recharge)
+}
